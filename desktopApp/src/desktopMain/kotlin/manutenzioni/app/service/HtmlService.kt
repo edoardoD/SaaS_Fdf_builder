@@ -98,8 +98,7 @@ class HtmlService(
             sb.appendLine("""                    <td class="cell--data-empty"><p>${escapeHtml(att.nAttivita.toString())}</p></td>""")
             sb.appendLine("""                    <td class="cell--data-empty"><p>${escapeHtml(att.tipoAttivita ?: "")}</p></td>""")
             sb.appendLine("""                    <td class="cell--data-empty"><p>${escapeHtml(att.frequenza.label())}</p></td>""")
-            sb.appendLine("""                    <td class="cell--data-empty"><p>${escapeHtml(att.descrizione ?: "")}</p></td>""")
-
+            sb.appendLine("""                    <td class="cell--data-empty"><p style="text-align:justify;">${escapeHtml(att.descrizione ?: "")}</p></td>""")
             // Colonne esito con radio button
             for (esito in esiti) {
                 val id = "${radioName}_${esito.lowercase()}"
