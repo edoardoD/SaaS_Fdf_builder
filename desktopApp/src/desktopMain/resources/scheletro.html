@@ -24,7 +24,10 @@
         }
 
         body {
-            margin: 1cm;
+            margin-left: auto;
+            margin-right: auto;
+            width: 21cm;
+            /* larghezza standard A4, centrare la tabella */
             direction: ltr;
         }
 
@@ -133,6 +136,8 @@
             color: var(--color-text-dark);
             font-size: 11pt;
             vertical-align: top;
+            text-align: justify;
+            /* giustifica il testo delle celle dati */
         }
 
         /* Celle per input form */
@@ -275,6 +280,11 @@
             box-sizing: border-box;
             overflow-wrap: break-word;
             word-break: break-all;
+        }
+
+        .table--main {
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
@@ -444,8 +454,7 @@
                     <td class="cell--spacer"></td>
                 </tr>
 
-                <!-- ========== SEZIONE 6: RIGHE DATI (generate dinamicamente) ========== -->
-                <!-- ATTIVITA_ROWS -->
+                <!-- ========== SEZIONE 6: RIGHE DATI (generate dinamicamente) ========== --><!-- ATTIVITA_ROWS -->
 
                 <!-- ========== SEZIONE 7: LEGENDA ========== -->
                 <tr class="row--legend">
