@@ -7,7 +7,9 @@ data class Impianto(
     val nomeCompleto: String,  // Esempio: "Gruppo Elettrogeno"
     val premessa: String?,     // Testo descrittivo sulla sicurezza
     val listaAttivita: List<Attivita>,
-    val listaNormative: List<Normativa> = emptyList()
+    val listaNormative: List<Normativa> = emptyList(),
+    val cantiereId: String? = null,
+    val quantita: Int = 1
 )
 
 @Serializable
@@ -54,13 +56,21 @@ data class Cliente(
     val id: String,
     val nome: String,
     val indirizzo: String? = null,
-    val partitaIva: String? = null
+    val partitaIva: String? = null,
+)
+
+@Serializable
+data class Cantiere(
+    val id: String,
+    val nome: String,
+    val clienteId: String
 )
 
 /** Wrapper per la serializzazione del database JSON */
 @Serializable
 data class ManutenzioniDatabase(
     val impianti: List<Impianto>,
-    val clienti: List<Cliente> = emptyList()
+    val clienti: List<Cliente> = emptyList(),
+    val cantieri: List<Cantiere> = emptyList()
 )
 

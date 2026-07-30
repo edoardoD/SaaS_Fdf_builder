@@ -31,42 +31,72 @@ fun App(viewModel: ManutenzioniViewModel) {
             // Barra di stato superiore
             StatusBar(uiState)
 
-            Row(modifier = Modifier.fillMaxSize()) {
-                // Sidebar — 25%
-                Sidebar(
-                    uiState = uiState,
-                    onClienteSelected = viewModel::selectCliente,
-                    onAddCliente = viewModel::addCliente,
-                    onImpiantoSelected = viewModel::selectImpianto,
-                    onAddNewImpianto = viewModel::createNewImpianto,
-                    onFrequenzaSelected = viewModel::selectFrequenza,
-                    onGeneraPdf = viewModel::generatePdf,
-                    onOpenPdf = viewModel::openPdfInSystem,
-                    onViewModeChanged = viewModel::setViewMode,
-                    onNumberOfCopiesChanged = viewModel::setNumberOfCopies,
-                    modifier = Modifier
-                        .fillMaxWidth(0.25f)
-                        .fillMaxHeight()
-                        .background(Color(0xFFF0F4FA))
-                        .padding(12.dp)
+            // Navigazione Top-Level
+            TabRow(
+                selectedTabIndex = if (uiState.currentSection == AppSection.SETUP) 0 else 1,
+                backgroundColor = MaterialTheme.colors.primary,
+                contentColor = Color.White
+            ) {
+                Tab(
+                    selected = uiState.currentSection == AppSection.SETUP,
+                    onClick = { viewModel.setSection(AppSection.SETUP) },
+                    text = { Text("Area Setup (Amministrazione)") }
                 )
+                Tab(
+                    selected = uiState.currentSection == AppSection.OPERATIVO,
+                    onClick = { viewModel.setSection(AppSection.OPERATIVO) },
+                    text = { Text("Area Operativa (Workflow)") }
+                )
+            }
 
-                // Divider verticale
-                Divider(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(1.dp),
-                    color = Color(0xFFDDDDDD)
-                )
-
-                // Area principale — 75%
-                MainContent(
+            if (uiState.currentSection == AppSection.SETUP) {
+                SetupScreen(
                     uiState = uiState,
-                    onSaveImpianto = viewModel::saveImpianto,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
+                    viewModel = viewModel,
+                    modifier = Modifier.fillMaxSize()
                 )
+            } else {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    // Sidebar — 25%
+                    Sidebar(
+                        uiState = uiState,
+                        onClienteSelected = viewModel::selectCliente,
+                        onCantiereSelected = viewModel::selectCantiere,
+                        onAddCliente = viewModel::addCliente,
+                        onAddNewImpianto = viewModel::createNewImpianto,
+                        onFrequenzaSelected = viewModel::selectFrequenza,
+                        onGeneraPdf = viewModel::generatePdf,
+                        onOpenPdf = viewModel::openPdfInSystem,
+                        onViewModeChanged = viewModel::setViewMode,
+                        modifier = Modifier
+                            .fillMaxWidth(0.25f)
+                            .fillMaxHeight()
+                            .background(Color(0xFFF0F4FA))
+                            .padding(12.dp)
+                    )
+
+                    // Divider verticale
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(1.dp),
+                        color = Color(0xFFDDDDDD)
+                    )
+
+                    // Area principale — 75%
+                    MainContent(
+                        uiState = uiState,
+                        onImpiantoSelectionChanged = viewModel::toggleImpiantoSelection,
+                        onEditImpianto = { impianto ->
+                            viewModel.selectImpianto(impianto)
+                            viewModel.setViewMode(ViewMode.IMPIANTO_EDITOR)
+                        },
+                        onSaveImpianto = viewModel::saveImpianto,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    )
+                }
             }
         }
     }

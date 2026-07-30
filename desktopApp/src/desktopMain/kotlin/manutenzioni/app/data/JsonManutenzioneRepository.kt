@@ -24,6 +24,7 @@ class JsonManutenzioneRepository(
     /** Cache in-memory del database */
     private var cache: MutableList<Impianto>? = null
     private var cacheClienti: MutableList<Cliente>? = null
+    private var cacheCantieri: MutableList<Cantiere>? = null
 
     init {
         println("📂 Database log: \${dbFile.absolutePath}")
@@ -58,7 +59,7 @@ class JsonManutenzioneRepository(
                 println("✓ Database demo copiato in: ${dbFile.absolutePath}")
             } else {
                 // Crea un database vuoto
-                val emptyDb = ManutenzioniDatabase(emptyList(), emptyList())
+                val emptyDb = ManutenzioniDatabase(emptyList(), emptyList(), emptyList())
                 dbFile.writeText(json.encodeToString(ManutenzioniDatabase.serializer(), emptyDb))
                 println("⚠ Database demo non trovato nelle resources. Creato database vuoto.")
             }
@@ -70,13 +71,13 @@ class JsonManutenzioneRepository(
             val content = dbFile.readText()
             json.decodeFromString(ManutenzioniDatabase.serializer(), content)
         } catch (e: Exception) {
-            println("Errore nel caricamento del database: ${e.message}")
-            ManutenzioniDatabase(emptyList(), emptyList())
+            println("Errore nel caricamento del database: \${e.message}")
+            ManutenzioniDatabase(emptyList(), emptyList(), emptyList())
         }
     }
 
-    private fun saveToDisk(impianti: List<Impianto>, clienti: List<Cliente>) {
-        val db = ManutenzioniDatabase(impianti, clienti)
+    private fun saveToDisk(impianti: List<Impianto>, clienti: List<Cliente>, cantieri: List<Cantiere>) {
+        val db = ManutenzioniDatabase(impianti, clienti, cantieri)
         dbFile.writeText(json.encodeToString(ManutenzioniDatabase.serializer(), db))
     }
 
@@ -86,6 +87,9 @@ class JsonManutenzioneRepository(
             cache = db.impianti.toMutableList()
             if (cacheClienti == null) {
                 cacheClienti = db.clienti.toMutableList()
+            }
+            if (cacheCantieri == null) {
+                cacheCantieri = db.cantieri.toMutableList()
             }
         }
         return cache!!
@@ -98,8 +102,22 @@ class JsonManutenzioneRepository(
             if (cache == null) {
                 cache = db.impianti.toMutableList()
             }
+            if (cacheCantieri == null) {
+                cacheCantieri = db.cantieri.toMutableList()
+            }
         }
         return cacheClienti!!
+    }
+
+    private fun getCantieriCache(): MutableList<Cantiere> {
+        if (cacheCantieri == null) {
+            val db = loadFromDisk()
+            cacheCantieri = db.cantieri.toMutableList()
+            // Assicura che anche le altre cache siano popolate
+            getImpiantiCache()
+            getClientiCache()
+        }
+        return cacheCantieri!!
     }
 
     // === Impianti CRUD ===
@@ -112,7 +130,7 @@ class JsonManutenzioneRepository(
         } else {
             list.add(impianto)
         }
-        saveToDisk(list, getClientiCache())
+        saveToDisk(list, getClientiCache(), getCantieriCache())
     }
 
     override suspend fun caricaImpianti(): List<Impianto> {
@@ -122,7 +140,7 @@ class JsonManutenzioneRepository(
     override suspend fun eliminaImpianto(codIntervento: String) {
         val list = getImpiantiCache()
         list.removeAll { it.codIntervento == codIntervento }
-        saveToDisk(list, getClientiCache())
+        saveToDisk(list, getClientiCache(), getCantieriCache())
     }
 
     override suspend fun getImpianto(codIntervento: String): Impianto? {
@@ -143,12 +161,41 @@ class JsonManutenzioneRepository(
         } else {
             list.add(cliente)
         }
-        saveToDisk(getImpiantiCache(), list)
+        saveToDisk(getImpiantiCache(), list, getCantieriCache())
     }
 
     override suspend fun eliminaCliente(id: String) {
         val list = getClientiCache()
         list.removeAll { it.id == id }
-        saveToDisk(getImpiantiCache(), list)
+        saveToDisk(getImpiantiCache(), list, getCantieriCache())
+    }
+
+    // === Getters for new workflow ===
+
+    override suspend fun getCantieriForCliente(clienteId: String): List<Cantiere> {
+        return getCantieriCache().filter { it.clienteId == clienteId }
+    }
+
+    override suspend fun getImpiantiForCantiere(cantiereId: String): List<Impianto> {
+        return getImpiantiCache().filter { it.cantiereId == cantiereId }
+    }
+
+    // === Cantieri CRUD ===
+
+    override suspend fun salvaCantiere(cantiere: Cantiere) {
+        val list = getCantieriCache()
+        val index = list.indexOfFirst { it.id == cantiere.id }
+        if (index >= 0) {
+            list[index] = cantiere
+        } else {
+            list.add(cantiere)
+        }
+        saveToDisk(getImpiantiCache(), getClientiCache(), list)
+    }
+
+    override suspend fun eliminaCantiere(id: String) {
+        val list = getCantieriCache()
+        list.removeAll { it.id == id }
+        saveToDisk(getImpiantiCache(), getClientiCache(), list)
     }
 }

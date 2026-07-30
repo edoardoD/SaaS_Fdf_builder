@@ -21,6 +21,8 @@ import manutenzioni.app.data.Impianto
 @Composable
 fun MainContent(
     uiState: ManutenzioniUiState,
+    onImpiantoSelectionChanged: (String, Boolean) -> Unit,
+    onEditImpianto: (Impianto) -> Unit,
     onSaveImpianto: (Impianto) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -35,20 +37,38 @@ fun MainContent(
             }
         }
 
-        uiState.selectedImpianto == null -> {
+        uiState.selectedCliente == null -> {
             WelcomeScreen(modifier)
         }
 
-        uiState.viewMode == ViewMode.PDF_PREVIEW -> {
-            PdfPreviewPanel(uiState, modifier)
+        uiState.selectedCantiere != null && uiState.viewMode == ViewMode.PDF_PREVIEW -> {
+            ImpiantoSelectionList(
+                impianti = uiState.impiantiDelCantiere,
+                selectionState = uiState.impiantiSelezionati,
+                onSelectionChanged = onImpiantoSelectionChanged,
+                onEditImpianto = onEditImpianto,
+                modifier = modifier
+            )
         }
 
         uiState.viewMode == ViewMode.IMPIANTO_EDITOR -> {
-            ImpiantoEditor(
-                impianto = uiState.selectedImpianto,
-                onSave = onSaveImpianto,
-                modifier = modifier
-            )
+            val selectedImpianto = uiState.selectedImpianto
+            if (selectedImpianto != null) {
+                ImpiantoEditor(
+                    impianto = selectedImpianto,
+                    isReadOnlyAdminFields = true,
+                    onSave = onSaveImpianto,
+                    modifier = modifier
+                )
+            } else {
+                Box(modifier = modifier, contentAlignment = Alignment.Center) {
+                    Text("Nessun impianto selezionato per la modifica.")
+                }
+            }
+        }
+
+        else -> {
+            PdfPreviewPanel(uiState, modifier)
         }
     }
 }
@@ -80,7 +100,7 @@ private fun WelcomeScreen(modifier: Modifier) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Seleziona un impianto dalla sidebar per iniziare",
+                    text = "Seleziona un cliente e un cantiere per iniziare",
                     color = Color.Gray
                 )
                 Divider(modifier = Modifier.width(200.dp))

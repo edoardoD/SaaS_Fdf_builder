@@ -33,6 +33,7 @@ import manutenzioni.app.data.*
 fun ImpiantoEditor(
     impianto: Impianto,
     isNew: Boolean = impianto.codIntervento.isBlank(),
+    isReadOnlyAdminFields: Boolean = false,
     onSave: (Impianto) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -40,6 +41,7 @@ fun ImpiantoEditor(
     var codIntervento by remember(impianto) { mutableStateOf(impianto.codIntervento) }
     var nomeCompleto by remember(impianto) { mutableStateOf(impianto.nomeCompleto) }
     var premessa by remember(impianto) { mutableStateOf(impianto.premessa ?: "") }
+    var quantita by remember(impianto) { mutableStateOf(impianto.quantita.toString()) }
     var attivitaList by remember(impianto) { mutableStateOf(impianto.listaAttivita) }
 
     // Stato di validazione locale
@@ -78,6 +80,7 @@ fun ImpiantoEditor(
                             codIntervento = codIntervento.trim(),
                             nomeCompleto = nomeCompleto.trim(),
                             premessa = premessa.ifBlank { null },
+                            quantita = quantita.toIntOrNull() ?: 1,
                             listaAttivita = attivitaList
                         )
                         onSave(updated)
@@ -149,6 +152,16 @@ fun ImpiantoEditor(
                     label = { Text("Premessa") },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 4
+                )
+                OutlinedTextField(
+                    value = quantita,
+                    onValueChange = { quantita = it },
+                    label = { Text("Quantità predefinita") },
+                    modifier = Modifier.fillMaxWidth(0.3f),
+                    singleLine = true,
+                    readOnly = isReadOnlyAdminFields,
+                    enabled = !isReadOnlyAdminFields,
+                    textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
                 )
             }
         }

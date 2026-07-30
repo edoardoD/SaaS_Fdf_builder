@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import manutenzioni.app.data.Cantiere
 import manutenzioni.app.data.Cliente
 import manutenzioni.app.data.Impianto
 import manutenzioni.app.data.Periodo
@@ -25,6 +26,12 @@ enum class ViewMode {
     IMPIANTO_EDITOR
 }
 
+/** Sezioni principali dell'applicazione */
+enum class AppSection {
+    SETUP,
+    OPERATIVO
+}
+
 /**
  * Stato immutabile dell'interfaccia utente.
  * Ogni cambiamento genera una nuova istanza (unidirectional data flow).
@@ -36,13 +43,16 @@ data class ManutenzioniUiState(
     val selectedFrequenza: Periodo? = null,
     val clienti: List<Cliente> = emptyList(),
     val selectedCliente: Cliente? = null,
+    val cantieriDisponibili: List<Cantiere> = emptyList(),
+    val selectedCantiere: Cantiere? = null,
+    val impiantiDelCantiere: List<Impianto> = emptyList(),
+    val impiantiSelezionati: Map<String, Boolean> = emptyMap(),
     val pdfFile: File? = null,
     val isLoading: Boolean = false,
-    val statusMessage: String = "Seleziona un impianto per iniziare",
+    val statusMessage: String = "Seleziona un cliente per iniziare",
     val errorMessage: String? = null,
     val viewMode: ViewMode = ViewMode.PDF_PREVIEW,
-    /** Numero di copie da generare (>= 1, default = 1) */
-    val numberOfCopies: Int = 1,
+    val currentSection: AppSection = AppSection.OPERATIVO,
     /** Progresso batch: "Generazione copia X di N..." (null se non in corso) */
     val batchProgress: String? = null,
     /** Lista dei file generati nell'ultimo batch */
@@ -112,9 +122,27 @@ class ManutenzioniViewModel(
         _uiState.update {
             it.copy(
                 selectedCliente = cliente,
-                statusMessage = "Cliente: ${cliente.nome}",
+                selectedCantiere = null,
+                cantieriDisponibili = emptyList(),
+                impiantiDelCantiere = emptyList(),
+                impiantiSelezionati = emptyMap(),
+                statusMessage = "Cliente: ${cliente.nome}. Ora seleziona un cantiere.",
                 errorMessage = null
             )
+        }
+        loadCantieriForCliente(cliente.id)
+    }
+
+    private fun loadCantieriForCliente(clienteId: String) {
+        scope.launch {
+            try {
+                val cantieri = repository.getCantieriForCliente(clienteId)
+                _uiState.update { it.copy(cantieriDisponibili = cantieri) }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = "Errore caricamento cantieri: ${e.message}")
+                }
+            }
         }
     }
 
@@ -140,6 +168,53 @@ class ManutenzioniViewModel(
         }
     }
 
+    fun addCantiere(cantiere: Cantiere) {
+        scope.launch {
+            try {
+                repository.salvaCantiere(cantiere)
+                val cantieri = repository.getCantieriForCliente(cantiere.clienteId)
+                _uiState.update {
+                    it.copy(
+                        cantieriDisponibili = cantieri,
+                        selectedCantiere = cantiere,
+                        statusMessage = "✓ Cantiere ${cantiere.nome} aggiunto",
+                        errorMessage = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = "Errore salvataggio cantiere: ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun selectCantiere(cantiere: Cantiere) {
+        _uiState.update {
+            it.copy(
+                selectedCantiere = cantiere,
+                impiantiDelCantiere = emptyList(),
+                impiantiSelezionati = emptyMap(),
+                statusMessage = "Cantiere: ${cantiere.nome}. Seleziona gli impianti.",
+                errorMessage = null
+            )
+        }
+        loadImpiantiForCantiere(cantiere.id)
+    }
+
+    private fun loadImpiantiForCantiere(cantiereId: String) {
+        scope.launch {
+            try {
+                val impianti = repository.getImpiantiForCantiere(cantiereId)
+                _uiState.update { it.copy(impiantiDelCantiere = impianti) }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = "Errore caricamento impianti: ${e.message}")
+                }
+            }
+        }
+    }
+
     /** Seleziona un impianto e calcola le frequenze disponibili */
     fun selectImpianto(impianto: Impianto) {
         val frequenze = FrequencyFilter.frequenzeDisponibili(impianto.listaAttivita)
@@ -155,14 +230,24 @@ class ManutenzioniViewModel(
         }
     }
 
+    fun toggleImpiantoSelection(impiantoId: String, isSelected: Boolean) {
+        val updatedSelection = _uiState.value.impiantiSelezionati.toMutableMap()
+        if (isSelected) {
+            updatedSelection[impiantoId] = true
+        } else {
+            updatedSelection.remove(impiantoId)
+        }
+        _uiState.update { it.copy(impiantiSelezionati = updatedSelection) }
+    }
+
     /** Seleziona una frequenza e genera automaticamente il PDF */
     fun selectFrequenza(frequenza: Periodo) {
         _uiState.update { it.copy(selectedFrequenza = frequenza) }
     }
 
-    /** Imposta il numero di copie da generare (min 1) */
-    fun setNumberOfCopies(n: Int) {
-        _uiState.update { it.copy(numberOfCopies = n.coerceIn(1, 99)) }
+    /** Cambia la sezione corrente dell'app */
+    fun setSection(section: AppSection) {
+        _uiState.update { it.copy(currentSection = section) }
     }
 
     /** Seleziona una cartella di output in modo cross-platform (macOS: FileDialog, altri: JFileChooser) */
@@ -200,55 +285,72 @@ class ManutenzioniViewModel(
     /** Genera il PDF con la strategia corrente — usa sempre il flusso batch */
     fun generatePdf() {
         val state = _uiState.value
-        val impianto = state.selectedImpianto ?: return
+        val impiantiSelezionatiIds = state.impiantiSelezionati.filter { it.value }.keys
+        if (impiantiSelezionatiIds.isEmpty()) {
+            _uiState.update { it.copy(errorMessage = "Nessun impianto selezionato.") }
+            return
+        }
         val frequenza = state.selectedFrequenza ?: return
-        val copies = state.numberOfCopies
 
         val outputDir = selectOutputDirectoryCompatibile() ?: return
 
         scope.launch {
+            val impiantiDaGenerare = state.impiantiDelCantiere.filter { it.codIntervento in impiantiSelezionatiIds }
+
             _uiState.update {
                 it.copy(
                     isLoading = true,
                     errorMessage = null,
                     batchProgress = "Avvio generazione...",
-                    statusMessage = "Generazione di $copies ${if (copies == 1) "copia" else "copie"} in corso...",
+                    statusMessage = "Generazione di ${impiantiDaGenerare.size} PDF in corso...",
                     generatedFiles = emptyList()
                 )
             }
-            try {
-                val batchResult = withContext(Dispatchers.IO) {
-                    pdfStrategy.generateBatch(
-                        impianto = impianto,
-                        frequenza = frequenza,
-                        outputDir = outputDir,
-                        copies = copies,
-                        clienteNome = state.selectedCliente?.nome,
-                        onProgress = { current, total ->
-                            _uiState.update {
-                                it.copy(
-                                    batchProgress = "Generazione copia $current di $total...",
-                                    statusMessage = "Generazione copia $current di $total..."
-                                )
+
+            val allGeneratedFiles = mutableListOf<File>()
+            var totalSuccessCount = 0
+            val totalErrors = mutableMapOf<String, String>()
+
+            for ((index, impianto) in impiantiDaGenerare.withIndex()) {
+                try {
+                    val batchResult = withContext(Dispatchers.IO) {
+                        pdfStrategy.generateBatch(
+                            impianto = impianto,
+                            frequenza = frequenza,
+                            outputDir = outputDir,
+                            copies = impianto.quantita,
+                            clienteNome = state.selectedCliente?.nome,
+                            onProgress = { current, total ->
+                                _uiState.update {
+                                    it.copy(
+                                        batchProgress = "Impianto ${index + 1}/${impiantiDaGenerare.size}: PDF $current di $total...",
+                                        statusMessage = "Generazione ${impianto.codIntervento}..."
+                                    )
+                                }
                             }
+                        )
+                    }
+                    allGeneratedFiles.addAll(batchResult.generatedFiles)
+                    totalSuccessCount += batchResult.successCount
+                    if (!batchResult.isFullSuccess) {
+                        batchResult.errors.forEach { (copy, error) ->
+                            totalErrors["${impianto.codIntervento} (copia $copy)"] = error
                         }
-                    )
+                    }
+                } catch (e: Exception) {
+                    totalErrors[impianto.codIntervento] = e.message ?: "Errore sconosciuto"
                 }
+            }
 
-                val statusMsg = if (batchResult.isFullSuccess) {
-                    "✓ ${batchResult.successCount} ${if (batchResult.successCount == 1) "PDF generato" else "PDF generati"} in ${outputDir.name}/"
-                } else {
-                    "⚠ ${batchResult.successCount}/${batchResult.totalRequested} PDF generati. ${batchResult.failureCount} errori."
-                }
-
-                val errorMsg = if (batchResult.errors.isNotEmpty()) {
-                    "Errori: " + batchResult.errors.entries.joinToString("; ") { "Copia ${it.key}: ${it.value}" }
-                } else null
+            val statusMsg = "✓ $totalSuccessCount PDF generati. ${totalErrors.size} errori."
+            val errorMsg = if (totalErrors.isNotEmpty()) {
+                "Errori: " + totalErrors.entries.joinToString("; ") { "${it.key}: ${it.value}" }
+            } else null
 
                 _uiState.update {
                     it.copy(
-                        pdfFile = batchResult.generatedFiles.firstOrNull(),
-                        generatedFiles = batchResult.generatedFiles,
+                        pdfFile = allGeneratedFiles.firstOrNull(),
+                        generatedFiles = allGeneratedFiles,
                         isLoading = false,
                         batchProgress = null,
                         statusMessage = statusMsg,
@@ -256,15 +358,6 @@ class ManutenzioniViewModel(
                         viewMode = ViewMode.PDF_PREVIEW
                     )
                 }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        batchProgress = null,
-                        errorMessage = "Errore generazione PDF: ${e.message}"
-                    )
-                }
-            }
         }
     }
 
@@ -290,13 +383,17 @@ class ManutenzioniViewModel(
      * Crea un nuovo impianto vuoto, lo seleziona e apre l'editor.
      * L'utente potrà compilare codice, nome, premessa e attività dall'editor.
      */
-    fun createNewImpianto() {
-        val newImpianto = Impianto(
+    fun createNewImpianto(template: Impianto? = null) {
+        val newImpianto = template?.copy(
+            cantiereId = _uiState.value.selectedCantiere?.id,
+            quantita = 1
+        ) ?: Impianto(
             codIntervento = "",
             nomeCompleto = "",
             premessa = null,
             listaAttivita = emptyList(),
-            listaNormative = emptyList()
+            listaNormative = emptyList(),
+            quantita = 1
         )
         _uiState.update {
             it.copy(
@@ -352,5 +449,9 @@ class ManutenzioniViewModel(
     /** Ricarica i dati dal repository */
     fun refresh() {
         loadImpianti()
+        loadClienti()
+        _uiState.value.selectedCliente?.let {
+            loadCantieriForCliente(it.id)
+        }
     }
 }

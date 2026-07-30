@@ -1,5 +1,6 @@
 package manutenzioni.domain
 
+import manutenzioni.app.data.Cantiere
 import manutenzioni.app.data.Cliente
 import manutenzioni.app.data.Impianto
 
@@ -13,4 +14,12 @@ interface ManutenzioneRepository {
     suspend fun caricaClienti(): List<Cliente>
     suspend fun salvaCliente(cliente: Cliente)
     suspend fun eliminaCliente(id: String)
+
+    // --- Getters for new workflow ---
+    suspend fun getCantieriForCliente(clienteId: String): List<Cantiere>
+    suspend fun getImpiantiForCantiere(cantiereId: String): List<Impianto>
+    
+    // --- CRUD Cantieri ---
+    suspend fun salvaCantiere(cantiere: Cantiere)
+    suspend fun eliminaCantiere(id: String)
 }

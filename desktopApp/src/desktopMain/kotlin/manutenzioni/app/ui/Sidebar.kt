@@ -14,9 +14,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import manutenzioni.app.data.Cantiere
 import manutenzioni.app.data.Cliente
 import manutenzioni.app.data.Impianto
 import manutenzioni.app.data.Periodo
+import manutenzioni.domain.service.FrequencyFilter
 import java.util.UUID
 
 /**
@@ -32,14 +34,13 @@ import java.util.UUID
 fun Sidebar(
     uiState: ManutenzioniUiState,
     onClienteSelected: (Cliente) -> Unit,
+    onCantiereSelected: (Cantiere) -> Unit,
     onAddCliente: (Cliente) -> Unit,
-    onImpiantoSelected: (Impianto) -> Unit,
     onAddNewImpianto: () -> Unit,
     onFrequenzaSelected: (Periodo) -> Unit,
     onGeneraPdf: () -> Unit,
     onOpenPdf: () -> Unit,
     onViewModeChanged: (ViewMode) -> Unit,
-    onNumberOfCopiesChanged: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Flag locale per evidenziare errore selezione cliente
@@ -94,17 +95,17 @@ fun Sidebar(
 
         Divider()
 
-        // === Selezione Impianto ===
+        // === Selezione Cantiere ===
         Text(
-            text = "Impianto",
+            text = "Cantiere",
             style = MaterialTheme.typography.subtitle2,
             fontWeight = FontWeight.SemiBold
         )
-        ImpiantoDropdown(
-            impianti = uiState.impianti,
-            selected = uiState.selectedImpianto,
-            onSelected = onImpiantoSelected,
-            onAddNew = onAddNewImpianto
+        CantiereDropdown(
+            cantieri = uiState.cantieriDisponibili,
+            selected = uiState.selectedCantiere,
+            enabled = uiState.selectedCliente != null,
+            onSelected = onCantiereSelected
         )
 
         // === Selezione Frequenza ===
@@ -114,9 +115,9 @@ fun Sidebar(
             fontWeight = FontWeight.SemiBold
         )
         FrequenzaDropdown(
-            frequenze = uiState.frequenzeDisponibili,
+            frequenze = uiState.frequenzeDisponibili.ifEmpty { FrequencyFilter.frequenzeDisponibili(uiState.impiantiDelCantiere.flatMap { it.listaAttivita }) },
             selected = uiState.selectedFrequenza,
-            enabled = uiState.selectedImpianto != null,
+            enabled = uiState.impiantiSelezionati.any { it.value },
             onSelected = onFrequenzaSelected
         )
 
@@ -124,9 +125,11 @@ fun Sidebar(
 
         // === Info attività filtrate ===
         if (uiState.selectedImpianto != null && uiState.selectedFrequenza != null) {
-            val mesiTarget = uiState.selectedFrequenza.inMesi()
-            val count = uiState.selectedImpianto.listaAttivita
-                .count { mesiTarget % it.frequenza.inMesi() == 0 }
+            val impiantiSelezionati = uiState.impiantiDelCantiere.filter { uiState.impiantiSelezionati[it.codIntervento] == true }
+            val totaleAttivita = impiantiSelezionati.sumOf { impianto ->
+                val mesiTarget = uiState.selectedFrequenza!!.inMesi()
+                impianto.listaAttivita.count { mesiTarget % it.frequenza.inMesi() == 0 }
+            }
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 backgroundColor = Color(0xFFE3F2FD),
@@ -134,7 +137,7 @@ fun Sidebar(
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
-                        text = "$count attività incluse",
+                        text = "$totaleAttivita attività incluse in ${impiantiSelezionati.size} impianti",
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
                     )
@@ -150,47 +153,6 @@ fun Sidebar(
         Spacer(Modifier.height(8.dp))
 
         // === Bottoni Azione ===
-
-        // Selettore numero di copie
-        Text(
-            text = "Numero di copie",
-            style = MaterialTheme.typography.subtitle2,
-            fontWeight = FontWeight.SemiBold
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            IconButton(
-                onClick = { onNumberOfCopiesChanged(uiState.numberOfCopies - 1) },
-                enabled = uiState.numberOfCopies > 1,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Diminuisci copie",
-                    tint = if (uiState.numberOfCopies > 1) MaterialTheme.colors.primary else Color.LightGray
-                )
-            }
-            Text(
-                text = "${uiState.numberOfCopies}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            IconButton(
-                onClick = { onNumberOfCopiesChanged(uiState.numberOfCopies + 1) },
-                enabled = uiState.numberOfCopies < 99,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    Icons.Default.KeyboardArrowUp,
-                    contentDescription = "Aumenta copie",
-                    tint = if (uiState.numberOfCopies < 99) MaterialTheme.colors.primary else Color.LightGray
-                )
-            }
-        }
 
         // Indicatore progresso batch (visibile solo durante la generazione)
         uiState.batchProgress?.let { progress ->
@@ -227,7 +189,7 @@ fun Sidebar(
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = uiState.selectedImpianto != null
+            enabled = uiState.impiantiSelezionati.any { it.value }
                     && uiState.selectedFrequenza != null
                     && !uiState.isLoading,
             colors = ButtonDefaults.buttonColors(
@@ -277,85 +239,46 @@ fun Sidebar(
     }
 }
 
-/**
- * Dropdown per la selezione dell'impianto.
- * La prima voce è sempre "➕ Aggiungi Nuovo Impianto".
- */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun ImpiantoDropdown(
-    impianti: List<Impianto>,
-    selected: Impianto?,
-    onSelected: (Impianto) -> Unit,
-    onAddNew: () -> Unit
+fun CantiereDropdown(
+    cantieri: List<Cantiere>,
+    selected: Cantiere?,
+    enabled: Boolean,
+    onSelected: (Cantiere) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        expanded = expanded && enabled,
+        onExpandedChange = { if (enabled) expanded = !expanded }
     ) {
         OutlinedTextField(
-            value = selected?.let {
-                if (it.codIntervento.isBlank()) "Nuovo impianto (non salvato)"
-                else "${it.codIntervento} — ${it.nomeCompleto}"
-            } ?: "",
+            value = selected?.nome ?: "",
             onValueChange = {},
             readOnly = true,
-            placeholder = { Text("Seleziona impianto...", fontSize = 12.sp) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            enabled = enabled,
+            placeholder = { Text(if (enabled) "Seleziona cantiere..." else "Prima seleziona un cliente", fontSize = 12.sp) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && enabled) },
             modifier = Modifier.fillMaxWidth(),
             textStyle = LocalTextStyle.current.copy(fontSize = 12.sp),
             singleLine = true
         )
 
         ExposedDropdownMenu(
-            expanded = expanded,
+            expanded = expanded && enabled,
             onDismissRequest = { expanded = false }
         ) {
-            // Prima voce: Aggiungi Nuovo Impianto
-            DropdownMenuItem(onClick = {
-                expanded = false
-                onAddNew()
-            }) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colors.primary
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "➕ Aggiungi Nuovo Impianto",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.primary
-                    )
-                }
-            }
-
-            if (impianti.isNotEmpty()) {
-                Divider()
-            }
-
-            impianti.forEach { impianto ->
+            cantieri.forEach { cantiere ->
                 DropdownMenuItem(onClick = {
-                    onSelected(impianto)
+                    onSelected(cantiere)
                     expanded = false
                 }) {
-                    Column {
-                        Text(
-                            text = "${impianto.codIntervento} — ${impianto.nomeCompleto}",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "${impianto.listaAttivita.size} attività",
-                            fontSize = 10.sp,
-                            color = Color.Gray
-                        )
-                    }
+                    Text(
+                        text = cantiere.nome,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
@@ -386,7 +309,7 @@ private fun FrequenzaDropdown(
             enabled = enabled,
             placeholder = {
                 Text(
-                    if (enabled) "Seleziona frequenza..." else "Prima seleziona un impianto",
+                    if (enabled) "Seleziona frequenza..." else "Prima seleziona gli impianti",
                     fontSize = 12.sp
                 )
             },
@@ -419,7 +342,7 @@ private fun FrequenzaDropdown(
  */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun ClienteDropdown(
+fun ClienteDropdown(
     clienti: List<Cliente>,
     selected: Cliente?,
     showError: Boolean,
@@ -517,7 +440,7 @@ private fun ClienteDropdown(
  * Campi: Nome (obbligatorio), Indirizzo, Partita IVA.
  */
 @Composable
-private fun NuovoClienteDialog(
+fun NuovoClienteDialog(
     onDismiss: () -> Unit,
     onConfirm: (Cliente) -> Unit
 ) {
