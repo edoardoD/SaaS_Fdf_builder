@@ -89,7 +89,7 @@ fun AdminClientiTab(
                 Text("Nessun cliente inserito.", color = MaterialTheme.colors.secondary)
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
                 items(clienti) { cliente ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),

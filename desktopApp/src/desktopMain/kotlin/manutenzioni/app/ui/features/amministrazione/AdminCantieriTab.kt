@@ -117,7 +117,7 @@ fun AdminCantieriTab(
                     Text("Nessun cantiere per questo cliente.", color = MaterialTheme.colors.secondary)
                 }
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
                     items(cantieri) { cantiere ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),

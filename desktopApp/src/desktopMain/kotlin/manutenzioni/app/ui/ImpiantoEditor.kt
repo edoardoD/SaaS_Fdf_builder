@@ -53,8 +53,9 @@ fun ImpiantoEditor(
     var codInterventoError by remember { mutableStateOf(false) }
     var nomeCompletoError by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        // Header
+    LazyColumn(modifier = modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item {
+            // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -114,7 +115,9 @@ fun ImpiantoEditor(
                 }
             }
         }
+        }
 
+        item {
         // Campi principali
         Card(modifier = Modifier.fillMaxWidth(), elevation = 2.dp) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -183,17 +186,6 @@ fun ImpiantoEditor(
                 )
             }
 
-            OutlinedTextField(
-                value = noteSpecifiche,
-                onValueChange = { noteSpecifiche = it },
-                label = { Text("Note Specifiche Cantiere") },
-                modifier = Modifier.fillMaxWidth().height(100.dp),
-                maxLines = 3,
-                readOnly = false, // Sempre editabile a livello di cantiere
-                enabled = true,
-                textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
-            )
-
             if (!isReadOnlyAdminFields && !isNew) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
                     Checkbox(
@@ -204,7 +196,9 @@ fun ImpiantoEditor(
                 }
             }
         }
+        }
 
+        item {
         // Lista attività
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -229,12 +223,9 @@ fun ImpiantoEditor(
                 Text("Aggiungi attività")
             }
         }
+        }
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.weight(1f)
-        ) {
-            itemsIndexed(attivitaList, key = { idx, att -> "${att.nAttivita}_$idx" }) { index, att ->
+        itemsIndexed(attivitaList, key = { idx, att -> "${att.nAttivita}_$idx" }) { index, att ->
                 AttivitaCard(
                     attivita = att,
                     onUpdate = { updated ->
@@ -245,7 +236,6 @@ fun ImpiantoEditor(
                     }
                 )
             }
-        }
     }
 }
 

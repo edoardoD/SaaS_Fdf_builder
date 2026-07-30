@@ -45,7 +45,7 @@ fun AdminDashboardScreen(
         Divider(color = SlateBorder, thickness = 1.dp)
         Spacer(modifier = Modifier.height(24.dp))
         
-        Box(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 16.dp)) {
             when (state.currentAdminTab) {
                 AdminTab.CLIENTI -> {
                     AdminClientiTab(

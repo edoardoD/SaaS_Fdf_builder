@@ -83,7 +83,7 @@ fun AdminImpiantiGlobaliTab(
                 Text("Nessun modello globale definito.", color = MaterialTheme.colors.secondary)
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
                 items(impiantiGlobali) { impianto ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
