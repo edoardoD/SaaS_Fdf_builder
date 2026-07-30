@@ -35,6 +35,7 @@ fun ImpiantoEditor(
     isNew: Boolean = impianto.codIntervento.isBlank(),
     isReadOnlyAdminFields: Boolean = false,
     onSave: (Impianto, Boolean) -> Unit,
+    onCancel: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // Stato locale mutabile per l'editing
@@ -73,32 +74,44 @@ fun ImpiantoEditor(
                     )
                 }
             }
-            Button(
-                onClick = {
-                    // Validazione locale
-                    codInterventoError = codIntervento.isBlank()
-                    nomeCompletoError = nomeCompleto.isBlank()
-
-                    if (!codInterventoError && !nomeCompletoError) {
-                        val updated = impianto.copy(
-                            codIntervento = codIntervento.trim(),
-                            nomeCompleto = nomeCompleto.trim(),
-                            premessa = premessa.ifBlank { null },
-                            quantita = quantita.toIntOrNull() ?: 1,
-                            noteSpecifiche = noteSpecifiche.ifBlank { null },
-                            listaAttivita = attivitaList
-                        )
-                        onSave(updated, propagaModifiche)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (onCancel != null) {
+                    OutlinedButton(
+                        onClick = onCancel,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colors.error)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Annulla")
                     }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color(0xFF2E7D32),
-                    contentColor = Color.White
-                )
-            ) {
-                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(if (isNew) "Crea Impianto" else "Salva")
+                }
+                Button(
+                    onClick = {
+                        // Validazione locale
+                        codInterventoError = codIntervento.isBlank()
+                        nomeCompletoError = nomeCompleto.isBlank()
+    
+                        if (!codInterventoError && !nomeCompletoError) {
+                            val updated = impianto.copy(
+                                codIntervento = codIntervento.trim(),
+                                nomeCompleto = nomeCompleto.trim(),
+                                premessa = premessa.ifBlank { null },
+                                quantita = quantita.toIntOrNull() ?: 1,
+                                noteSpecifiche = noteSpecifiche.ifBlank { null },
+                                listaAttivita = attivitaList
+                            )
+                            onSave(updated, propagaModifiche)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color(0xFF2E7D32),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (isNew) "Crea Impianto" else "Salva")
+                }
             }
         }
 
@@ -161,11 +174,11 @@ fun ImpiantoEditor(
                 OutlinedTextField(
                     value = quantita,
                     onValueChange = { quantita = it },
-                    label = { Text("Quantità predefinita") },
+                    label = { Text("Quantità *") },
                     modifier = Modifier.fillMaxWidth(0.3f),
                     singleLine = true,
-                    readOnly = isReadOnlyAdminFields,
-                    enabled = !isReadOnlyAdminFields,
+                    readOnly = false, // Sempre editabile a livello di cantiere
+                    enabled = true,
                     textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
                 )
             }
@@ -173,10 +186,12 @@ fun ImpiantoEditor(
             OutlinedTextField(
                 value = noteSpecifiche,
                 onValueChange = { noteSpecifiche = it },
-                label = { Text("Note Specifiche (per questo cantiere)") },
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 4,
-                placeholder = { Text("Note che non verranno sovrascritte dagli aggiornamenti globali", fontSize = 12.sp) }
+                label = { Text("Note Specifiche Cantiere") },
+                modifier = Modifier.fillMaxWidth().height(100.dp),
+                maxLines = 3,
+                readOnly = false, // Sempre editabile a livello di cantiere
+                enabled = true,
+                textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
             )
 
             if (!isReadOnlyAdminFields && !isNew) {

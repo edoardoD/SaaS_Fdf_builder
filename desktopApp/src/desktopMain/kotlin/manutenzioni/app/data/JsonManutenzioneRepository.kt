@@ -180,6 +180,16 @@ class JsonManutenzioneRepository(
         saveToDisk(getImpiantiCache(), list, getCantieriCache())
     }
 
+    override suspend fun updateCliente(id: String, newName: String) {
+        val list = getClientiCache()
+        val index = list.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            val cliente = list[index]
+            list[index] = cliente.copy(nome = newName)
+            saveToDisk(getImpiantiCache(), list, getCantieriCache())
+        }
+    }
+
     override suspend fun eliminaCliente(id: String) {
         val list = getClientiCache()
         list.removeAll { it.id == id }
@@ -207,6 +217,16 @@ class JsonManutenzioneRepository(
             list.add(cantiere)
         }
         saveToDisk(getImpiantiCache(), getClientiCache(), list)
+    }
+
+    override suspend fun updateCantiere(id: String, newName: String) {
+        val list = getCantieriCache()
+        val index = list.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            val cantiere = list[index]
+            list[index] = cantiere.copy(nome = newName)
+            saveToDisk(getImpiantiCache(), getClientiCache(), list)
+        }
     }
 
     override suspend fun eliminaCantiere(id: String) {

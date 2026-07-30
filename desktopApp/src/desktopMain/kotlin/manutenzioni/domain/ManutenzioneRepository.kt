@@ -14,6 +14,7 @@ interface ManutenzioneRepository {
     // --- CRUD Clienti ---
     suspend fun caricaClienti(): List<Cliente>
     suspend fun salvaCliente(cliente: Cliente)
+    suspend fun updateCliente(id: String, newName: String)
     suspend fun eliminaCliente(id: String)
 
     // --- Getters for new workflow ---
@@ -22,5 +23,6 @@ interface ManutenzioneRepository {
     
     // --- CRUD Cantieri ---
     suspend fun salvaCantiere(cantiere: Cantiere)
+    suspend fun updateCantiere(id: String, newName: String)
     suspend fun eliminaCantiere(id: String)
 }

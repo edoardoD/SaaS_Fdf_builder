@@ -1,101 +1,61 @@
 package manutenzioni.app.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import manutenzioni.app.ui.features.amministrazione.AdminDashboardScreen
+import manutenzioni.app.ui.features.operativita.CantiereDetailScreen
+import manutenzioni.app.ui.features.operativita.OperativitaScreen
+import manutenzioni.app.ui.layout.MainScaffold
+import manutenzioni.app.ui.theme.ManutenzioniTheme
 
-/**
- * Composable root dell'applicazione.
- *
- * Layout: Sidebar (25%) + Area Principale (75%)
- */
 @Composable
 fun App(viewModel: ManutenzioniViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
-    MaterialTheme(
-        colors = lightColors(
-            primary = Color(0xFF3366FF),
-            primaryVariant = Color(0xFF1A3DB8),
-            secondary = Color(0xFFB4C6E7),
-            surface = Color.White,
-            background = Color(0xFFF5F5F5),
-            error = Color(0xFFD32F2F)
-        )
-    ) {
+    ManutenzioniTheme {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Barra di stato superiore
+            // Barra di stato superiore (mantenuta per feedback operativo)
             StatusBar(uiState)
 
-            // Navigazione Top-Level
-            TabRow(
-                selectedTabIndex = if (uiState.currentSection == AppSection.SETUP) 0 else 1,
-                backgroundColor = MaterialTheme.colors.primary,
-                contentColor = Color.White
+            MainScaffold(
+                currentSection = uiState.currentSection,
+                onSectionSelected = viewModel::setSection
             ) {
-                Tab(
-                    selected = uiState.currentSection == AppSection.SETUP,
-                    onClick = { viewModel.setSection(AppSection.SETUP) },
-                    text = { Text("Area Setup (Amministrazione)") }
-                )
-                Tab(
-                    selected = uiState.currentSection == AppSection.OPERATIVO,
-                    onClick = { viewModel.setSection(AppSection.OPERATIVO) },
-                    text = { Text("Area Operativa (Workflow)") }
-                )
-            }
-
-            if (uiState.currentSection == AppSection.SETUP) {
-                SetupScreen(
-                    uiState = uiState,
-                    viewModel = viewModel,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Row(modifier = Modifier.fillMaxSize()) {
-                    // Sidebar — 25%
-                    Sidebar(
-                        uiState = uiState,
-                        onClienteSelected = viewModel::selectCliente,
-                        onCantiereSelected = viewModel::selectCantiere,
-                        onAddCliente = viewModel::addCliente,
-                        onAddNewImpianto = viewModel::createNewImpianto,
-                        onFrequenzaSelected = viewModel::selectFrequenza,
-                        onGeneraPdf = viewModel::generatePdf,
-                        onOpenPdf = viewModel::openPdfInSystem,
-                        onViewModeChanged = viewModel::setViewMode,
-                        modifier = Modifier
-                            .fillMaxWidth(0.25f)
-                            .fillMaxHeight()
-                            .background(Color(0xFFF0F4FA))
-                            .padding(12.dp)
-                    )
-
-                    // Divider verticale
-                    Divider(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(1.dp),
-                        color = Color(0xFFDDDDDD)
-                    )
-
-                    // Area principale — 75%
-                    MainContent(
-                        uiState = uiState,
-                        onImpiantoSelectionChanged = viewModel::toggleImpiantoSelection,
-                        onEditImpianto = { impianto ->
-                            viewModel.selectImpianto(impianto)
-                            viewModel.setViewMode(ViewMode.IMPIANTO_EDITOR)
-                        },
-                        onSaveImpianto = viewModel::saveImpianto,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                    )
+                when (uiState.currentSection) {
+                    AppSection.OPERATIVITA -> {
+                        if (uiState.selectedCantiere == null) {
+                            OperativitaScreen(
+                                state = uiState,
+                                onClienteSelected = viewModel::selectCliente,
+                                onCantiereSelected = viewModel::selectCantiere,
+                                onAddCliente = viewModel::addCliente,
+                                onAddCantiere = viewModel::addCantiere
+                            )
+                        } else {
+                            CantiereDetailScreen(
+                                state = uiState,
+                                onBack = { viewModel.selectCantiere(null) },
+                                onImpiantoSelectionChanged = viewModel::toggleImpiantoSelection,
+                                onEditImpianto = { impianto -> viewModel.selectImpianto(impianto) },
+                                onSaveImpianto = viewModel::saveImpianto,
+                                onFrequenzaSelected = viewModel::selectFrequenza,
+                                onGeneraPdf = viewModel::generatePdf,
+                                onOpenPdf = viewModel::openPdfInSystem,
+                                onCreateNewImpianto = viewModel::createNewImpianto
+                            )
+                        }
+                    }
+                    AppSection.DATABASE -> {
+                        AdminDashboardScreen(
+                            state = uiState,
+                            viewModel = viewModel,
+                            onTabSelected = viewModel::setAdminTab
+                        )
+                    }
                 }
             }
         }
@@ -130,4 +90,3 @@ private fun StatusBar(uiState: ManutenzioniUiState) {
         }
     }
 }
-

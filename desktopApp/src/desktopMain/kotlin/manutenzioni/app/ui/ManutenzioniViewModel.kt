@@ -20,16 +20,17 @@ import manutenzioni.domain.strategy.PdfBatchGenerator
 import java.io.File
 import javax.swing.JFileChooser
 
-/** Modalità di visualizzazione dell'area principale */
-enum class ViewMode {
-    PDF_PREVIEW,
-    IMPIANTO_EDITOR
-}
-
 /** Sezioni principali dell'applicazione */
 enum class AppSection {
-    SETUP,
-    OPERATIVO
+    OPERATIVITA,
+    DATABASE
+}
+
+/** Tabs della sezione amministrazione */
+enum class AdminTab {
+    CLIENTI,
+    CANTIERI,
+    IMPIANTI_GLOBALI
 }
 
 /**
@@ -45,14 +46,15 @@ data class ManutenzioniUiState(
     val selectedCliente: Cliente? = null,
     val cantieriDisponibili: List<Cantiere> = emptyList(),
     val selectedCantiere: Cantiere? = null,
+    val impiantiGlobali: List<Impianto> = emptyList(),
     val impiantiDelCantiere: List<Impianto> = emptyList(),
     val impiantiSelezionati: Map<String, Boolean> = emptyMap(),
     val pdfFile: File? = null,
     val isLoading: Boolean = false,
     val statusMessage: String = "Seleziona un cliente per iniziare",
     val errorMessage: String? = null,
-    val viewMode: ViewMode = ViewMode.PDF_PREVIEW,
-    val currentSection: AppSection = AppSection.OPERATIVO,
+    val currentSection: AppSection = AppSection.OPERATIVITA,
+    val currentAdminTab: AdminTab = AdminTab.CLIENTI,
     /** Progresso batch: "Generazione copia X di N..." (null se non in corso) */
     val batchProgress: String? = null,
     /** Lista dei file generati nell'ultimo batch */
@@ -75,8 +77,8 @@ class ManutenzioniViewModel(
     val uiState: StateFlow<ManutenzioniUiState> = _uiState.asStateFlow()
 
     init {
-        loadImpianti()
-        loadClienti()
+        refresh()
+        loadImpiantiGlobali()
     }
 
     /** Carica gli impianti dal repository */
@@ -133,6 +135,17 @@ class ManutenzioniViewModel(
         loadCantieriForCliente(cliente.id)
     }
 
+    fun renameCantiere(id: String, newName: String) {
+        scope.launch {
+            try {
+                repository.updateCantiere(id, newName)
+                _uiState.value.selectedCliente?.id?.let { loadCantieriForCliente(it) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Errore ridenominazione cantiere: ${e.message}") }
+            }
+        }
+    }
+
     private fun loadCantieriForCliente(clienteId: String) {
         scope.launch {
             try {
@@ -168,6 +181,17 @@ class ManutenzioniViewModel(
         }
     }
 
+    fun renameCliente(id: String, newName: String) {
+        scope.launch {
+            try {
+                repository.updateCliente(id, newName)
+                refresh()
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Errore ridenominazione cliente: ${e.message}") }
+            }
+        }
+    }
+
     fun addCantiere(cantiere: Cantiere) {
         scope.launch {
             try {
@@ -189,10 +213,22 @@ class ManutenzioniViewModel(
         }
     }
 
-    fun selectCantiere(cantiere: Cantiere) {
+    fun selectCantiere(cantiere: Cantiere?) {
+        if (cantiere == null) {
+            _uiState.update {
+                it.copy(
+                    selectedCantiere = null,
+                    impiantiDelCantiere = emptyList(),
+                    impiantiSelezionati = emptyMap(),
+                    statusMessage = "Seleziona un cantiere."
+                )
+            }
+            return
+        }
         _uiState.update {
             it.copy(
                 selectedCantiere = cantiere,
+                selectedImpianto = null, // Fix: Chiudi editor impianto precedente
                 impiantiDelCantiere = emptyList(),
                 impiantiSelezionati = emptyMap(),
                 statusMessage = "Cantiere: ${cantiere.nome}. Seleziona gli impianti.",
@@ -250,6 +286,10 @@ class ManutenzioniViewModel(
         _uiState.update { it.copy(currentSection = section) }
     }
 
+    fun setAdminTab(tab: AdminTab) {
+        _uiState.update { it.copy(currentAdminTab = tab) }
+    }
+
     /** Seleziona una cartella di output in modo cross-platform (macOS: FileDialog, altri: JFileChooser) */
     private fun selectOutputDirectoryCompatibile(): File? {
         return try {
@@ -279,6 +319,14 @@ class ManutenzioniViewModel(
             }
         } catch (_: Exception) {
             null
+        }
+    }
+
+    private fun loadImpiantiGlobali() {
+        scope.launch {
+            val allImpianti = repository.caricaImpianti()
+            val globali = allImpianti.filter { it.cantiereId == null }
+            _uiState.update { it.copy(impiantiGlobali = globali) }
         }
     }
 
@@ -354,16 +402,10 @@ class ManutenzioniViewModel(
                         isLoading = false,
                         batchProgress = null,
                         statusMessage = statusMsg,
-                        errorMessage = errorMsg,
-                        viewMode = ViewMode.PDF_PREVIEW
+                        errorMessage = errorMsg
                     )
                 }
         }
-    }
-
-    /** Cambia la modalità di visualizzazione */
-    fun setViewMode(mode: ViewMode) {
-        _uiState.update { it.copy(viewMode = mode) }
     }
 
     /** Apre il PDF nel viewer di sistema */
@@ -383,17 +425,19 @@ class ManutenzioniViewModel(
      * Crea un nuovo impianto vuoto, lo seleziona e apre l'editor.
      * L'utente potrà compilare codice, nome, premessa e attività dall'editor.
      */
-    fun createNewImpianto(template: Impianto? = null) {
+    fun createNewImpianto(template: Impianto? = null, quantita: Int = 1) {
         val newImpianto = template?.copy(
+            id = java.util.UUID.randomUUID().toString(),
             cantiereId = _uiState.value.selectedCantiere?.id,
-            quantita = 1
+            quantita = quantita
         ) ?: Impianto(
+            id = java.util.UUID.randomUUID().toString(),
             codIntervento = "",
             nomeCompleto = "",
             premessa = null,
             listaAttivita = emptyList(),
-            listaNormative = emptyList(),
-            quantita = 1
+            cantiereId = _uiState.value.selectedCantiere?.id,
+            quantita = quantita
         )
         _uiState.update {
             it.copy(
@@ -401,7 +445,6 @@ class ManutenzioniViewModel(
                 frequenzeDisponibili = emptyList(),
                 selectedFrequenza = null,
                 pdfFile = null,
-                viewMode = ViewMode.IMPIANTO_EDITOR,
                 statusMessage = "Nuovo impianto — compila i dati e salva",
                 errorMessage = null
             )
@@ -429,9 +472,16 @@ class ManutenzioniViewModel(
                 repository.salvaImpianto(impianto)
                 val impiantiAggiornati = repository.caricaImpianti()
                 val frequenze = FrequencyFilter.frequenzeDisponibili(impianto.listaAttivita)
+                
+                // Aggiorna la lista degli impianti del cantiere corrente
+                val impiantiDelCantiereAggiornati = _uiState.value.selectedCantiere?.id?.let { cantiereId ->
+                    repository.getImpiantiForCantiere(cantiereId)
+                } ?: emptyList()
+                
                 _uiState.update {
                     it.copy(
                         impianti = impiantiAggiornati,
+                        impiantiDelCantiere = impiantiDelCantiereAggiornati, // Fix: ricarica lista
                         selectedImpianto = impianto,
                         frequenzeDisponibili = frequenze,
                         statusMessage = "✓ Impianto ${impianto.codIntervento} salvato",
@@ -453,6 +503,7 @@ class ManutenzioniViewModel(
         scope.launch {
             try {
                 repository.aggiornaImpiantiGlobalmente(impianto)
+                loadImpiantiGlobali()
                 val impiantiAggiornati = repository.caricaImpianti()
                 val frequenze = FrequencyFilter.frequenzeDisponibili(impianto.listaAttivita)
                 _uiState.update {
