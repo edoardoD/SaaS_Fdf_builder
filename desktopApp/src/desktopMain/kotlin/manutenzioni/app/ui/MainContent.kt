@@ -57,7 +57,7 @@ fun MainContent(
                 ImpiantoEditor(
                     impianto = selectedImpianto,
                     isReadOnlyAdminFields = true,
-                    onSave = onSaveImpianto,
+                    onSave = { impianto, _ -> onSaveImpianto(impianto) },
                     modifier = modifier
                 )
             } else {

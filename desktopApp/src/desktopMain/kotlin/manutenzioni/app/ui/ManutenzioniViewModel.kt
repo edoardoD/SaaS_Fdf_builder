@@ -446,6 +446,33 @@ class ManutenzioniViewModel(
         }
     }
 
+    /** Aggiorna l'impianto su tutti i cantieri in cui è presente */
+    fun updateImpiantoGlobale(impianto: Impianto) {
+        if (impianto.codIntervento.isBlank() || impianto.nomeCompleto.isBlank()) return
+
+        scope.launch {
+            try {
+                repository.aggiornaImpiantiGlobalmente(impianto)
+                val impiantiAggiornati = repository.caricaImpianti()
+                val frequenze = FrequencyFilter.frequenzeDisponibili(impianto.listaAttivita)
+                _uiState.update {
+                    it.copy(
+                        impianti = impiantiAggiornati,
+                        selectedImpianto = impianto,
+                        frequenzeDisponibili = frequenze,
+                        statusMessage = "✓ Impianto ${impianto.codIntervento} aggiornato globalmente",
+                        errorMessage = null
+                    )
+                }
+                _uiState.value.selectedCantiere?.let { loadCantieriForCliente(it.clienteId); loadImpiantiForCantiere(it.id) }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = "Errore aggiornamento globale: ${e.message}")
+                }
+            }
+        }
+    }
+
     /** Ricarica i dati dal repository */
     fun refresh() {
         loadImpianti()

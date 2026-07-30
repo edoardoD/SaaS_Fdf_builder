@@ -35,7 +35,14 @@ class HtmlService(
         html = html.replace("<!-- COD_SCHEDA -->", escapeHtml(impianto.codIntervento))
         html = html.replace("<!-- OGGETTO -->", escapeHtml(impianto.nomeCompleto))
         html = html.replace("<!-- PERIODICITA -->", escapeHtml(frequenza.label()))
-        html = html.replace("<!-- PREMESSA -->", escapeHtml(impianto.premessa ?: ""))
+        val premessaCompleta = buildString {
+            if (!impianto.premessa.isNullOrBlank()) append(impianto.premessa)
+            if (!impianto.noteSpecifiche.isNullOrBlank()) {
+                if (isNotEmpty()) append("\n\n")
+                append("Note specifiche cantiere:\n").append(impianto.noteSpecifiche)
+            }
+        }
+        html = html.replace("<!-- PREMESSA -->", escapeHtml(premessaCompleta))
 
         // Iniezione nome cliente nell'header
         val clienteText = if (!clienteNome.isNullOrBlank()) {

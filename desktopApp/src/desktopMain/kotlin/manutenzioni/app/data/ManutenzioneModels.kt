@@ -3,13 +3,15 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Impianto(
+    val id: String = java.util.UUID.randomUUID().toString(),
     val codIntervento: String, // Esempio: "GE", "CAB"
     val nomeCompleto: String,  // Esempio: "Gruppo Elettrogeno"
     val premessa: String?,     // Testo descrittivo sulla sicurezza
     val listaAttivita: List<Attivita>,
     val listaNormative: List<Normativa> = emptyList(),
     val cantiereId: String? = null,
-    val quantita: Int = 1
+    val quantita: Int = 1,
+    val noteSpecifiche: String? = null
 )
 
 @Serializable

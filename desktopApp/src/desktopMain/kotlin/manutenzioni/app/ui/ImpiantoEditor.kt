@@ -34,7 +34,7 @@ fun ImpiantoEditor(
     impianto: Impianto,
     isNew: Boolean = impianto.codIntervento.isBlank(),
     isReadOnlyAdminFields: Boolean = false,
-    onSave: (Impianto) -> Unit,
+    onSave: (Impianto, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Stato locale mutabile per l'editing
@@ -42,7 +42,11 @@ fun ImpiantoEditor(
     var nomeCompleto by remember(impianto) { mutableStateOf(impianto.nomeCompleto) }
     var premessa by remember(impianto) { mutableStateOf(impianto.premessa ?: "") }
     var quantita by remember(impianto) { mutableStateOf(impianto.quantita.toString()) }
+    var noteSpecifiche by remember(impianto) { mutableStateOf(impianto.noteSpecifiche ?: "") }
     var attivitaList by remember(impianto) { mutableStateOf(impianto.listaAttivita) }
+
+    // Stato per la propagazione globale
+    var propagaModifiche by remember { mutableStateOf(false) }
 
     // Stato di validazione locale
     var codInterventoError by remember { mutableStateOf(false) }
@@ -81,9 +85,10 @@ fun ImpiantoEditor(
                             nomeCompleto = nomeCompleto.trim(),
                             premessa = premessa.ifBlank { null },
                             quantita = quantita.toIntOrNull() ?: 1,
+                            noteSpecifiche = noteSpecifiche.ifBlank { null },
                             listaAttivita = attivitaList
                         )
-                        onSave(updated)
+                        onSave(updated, propagaModifiche)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -163,6 +168,25 @@ fun ImpiantoEditor(
                     enabled = !isReadOnlyAdminFields,
                     textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
                 )
+            }
+
+            OutlinedTextField(
+                value = noteSpecifiche,
+                onValueChange = { noteSpecifiche = it },
+                label = { Text("Note Specifiche (per questo cantiere)") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 4,
+                placeholder = { Text("Note che non verranno sovrascritte dagli aggiornamenti globali", fontSize = 12.sp) }
+            )
+
+            if (!isReadOnlyAdminFields && !isNew) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                    Checkbox(
+                        checked = propagaModifiche,
+                        onCheckedChange = { propagaModifiche = it }
+                    )
+                    Text("Propaga modifiche (attività e normative) a TUTTI i cantieri con codice $codIntervento", fontSize = 12.sp)
+                }
             }
         }
 

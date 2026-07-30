@@ -27,26 +27,38 @@ fun SetupScreen(
     modifier: Modifier = Modifier
 ) {
     var showNuovoClienteDialog by remember { mutableStateOf(false) }
+    var clienteToEdit by remember { mutableStateOf<Cliente?>(null) }
     var showNuovoCantiereDialog by remember { mutableStateOf(false) }
+    var cantiereToEdit by remember { mutableStateOf<Cantiere?>(null) }
     var showNuovoImpiantoDialog by remember { mutableStateOf(false) }
 
-    if (showNuovoClienteDialog) {
-        NuovoClienteDialog(
-            onDismiss = { showNuovoClienteDialog = false },
+    if (showNuovoClienteDialog || clienteToEdit != null) {
+        ClienteDialog(
+            initialCliente = clienteToEdit,
+            onDismiss = { 
+                showNuovoClienteDialog = false
+                clienteToEdit = null
+            },
             onConfirm = { cliente ->
                 viewModel.addCliente(cliente)
                 showNuovoClienteDialog = false
+                clienteToEdit = null
             }
         )
     }
 
-    if (showNuovoCantiereDialog && uiState.selectedCliente != null) {
-        NuovoCantiereDialog(
+    if ((showNuovoCantiereDialog || cantiereToEdit != null) && uiState.selectedCliente != null) {
+        CantiereDialog(
+            initialCantiere = cantiereToEdit,
             clienteId = uiState.selectedCliente.id,
-            onDismiss = { showNuovoCantiereDialog = false },
+            onDismiss = { 
+                showNuovoCantiereDialog = false
+                cantiereToEdit = null
+            },
             onConfirm = { cantiere ->
                 viewModel.addCantiere(cantiere)
                 showNuovoCantiereDialog = false
+                cantiereToEdit = null
             }
         )
     }
@@ -84,13 +96,23 @@ fun SetupScreen(
             Divider()
 
             Text("1. Seleziona o crea Cliente", style = MaterialTheme.typography.subtitle2)
-            ClienteDropdown(
-                clienti = uiState.clienti,
-                selected = uiState.selectedCliente,
-                showError = false,
-                onSelected = viewModel::selectCliente,
-                onAddNew = { showNuovoClienteDialog = true }
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.weight(1f)) {
+                    ClienteDropdown(
+                        clienti = uiState.clienti,
+                        selected = uiState.selectedCliente,
+                        showError = false,
+                        onSelected = viewModel::selectCliente,
+                        onAddNew = { showNuovoClienteDialog = true }
+                    )
+                }
+                IconButton(
+                    onClick = { clienteToEdit = uiState.selectedCliente },
+                    enabled = uiState.selectedCliente != null
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = "Modifica Cliente", tint = if (uiState.selectedCliente != null) MaterialTheme.colors.primary else Color.Gray)
+                }
+            }
 
             Text("2. Seleziona o crea Cantiere", style = MaterialTheme.typography.subtitle2)
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -103,10 +125,16 @@ fun SetupScreen(
                     )
                 }
                 IconButton(
+                    onClick = { cantiereToEdit = uiState.selectedCantiere },
+                    enabled = uiState.selectedCantiere != null
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = "Modifica Cantiere", tint = if (uiState.selectedCantiere != null) MaterialTheme.colors.primary else Color.Gray)
+                }
+                IconButton(
                     onClick = { showNuovoCantiereDialog = true },
                     enabled = uiState.selectedCliente != null
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Nuovo Cantiere", tint = MaterialTheme.colors.primary)
+                    Icon(Icons.Default.Add, contentDescription = "Nuovo Cantiere", tint = if (uiState.selectedCliente != null) MaterialTheme.colors.primary else Color.Gray)
                 }
             }
 
@@ -156,10 +184,14 @@ fun SetupScreen(
                 ImpiantoEditor(
                     impianto = uiState.selectedImpianto,
                     isReadOnlyAdminFields = false, // Permette la modifica della quantità e altri campi base
-                    onSave = { updatedImpianto ->
+                    onSave = { updatedImpianto, isGlobalUpdate ->
                         // Assicura che l'impianto sia associato al cantiere selezionato
                         val impiantoConCantiere = updatedImpianto.copy(cantiereId = uiState.selectedCantiere?.id)
-                        viewModel.saveImpianto(impiantoConCantiere)
+                        if (isGlobalUpdate) {
+                            viewModel.updateImpiantoGlobale(impiantoConCantiere)
+                        } else {
+                            viewModel.saveImpianto(impiantoConCantiere)
+                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -173,17 +205,18 @@ fun SetupScreen(
 }
 
 @Composable
-fun NuovoCantiereDialog(
+fun CantiereDialog(
+    initialCantiere: Cantiere? = null,
     clienteId: String,
     onDismiss: () -> Unit,
     onConfirm: (Cantiere) -> Unit
 ) {
-    var nome by remember { mutableStateOf("") }
+    var nome by remember { mutableStateOf(initialCantiere?.nome ?: "") }
     var nomeError by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuovo Cantiere", fontWeight = FontWeight.Bold) },
+        title = { Text(if (initialCantiere == null) "Nuovo Cantiere" else "Modifica Cantiere", fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 OutlinedTextField(
@@ -207,7 +240,8 @@ fun NuovoCantiereDialog(
                 if (nome.isBlank()) {
                     nomeError = true
                 } else {
-                    onConfirm(Cantiere(id = UUID.randomUUID().toString(), nome = nome.trim(), clienteId = clienteId))
+                    val id = initialCantiere?.id ?: UUID.randomUUID().toString()
+                    onConfirm(Cantiere(id = id, nome = nome.trim(), clienteId = clienteId))
                 }
             }) { Text("Salva") }
         },

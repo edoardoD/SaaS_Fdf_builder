@@ -124,7 +124,7 @@ class JsonManutenzioneRepository(
 
     override suspend fun salvaImpianto(impianto: Impianto) {
         val list = getImpiantiCache()
-        val index = list.indexOfFirst { it.codIntervento == impianto.codIntervento }
+        val index = list.indexOfFirst { it.id == impianto.id }
         if (index >= 0) {
             list[index] = impianto
         } else {
@@ -137,14 +137,30 @@ class JsonManutenzioneRepository(
         return getImpiantiCache().toList()
     }
 
-    override suspend fun eliminaImpianto(codIntervento: String) {
+    override suspend fun eliminaImpianto(id: String) {
         val list = getImpiantiCache()
-        list.removeAll { it.codIntervento == codIntervento }
+        list.removeAll { it.id == id }
         saveToDisk(list, getClientiCache(), getCantieriCache())
     }
 
     override suspend fun getImpianto(codIntervento: String): Impianto? {
         return getImpiantiCache().find { it.codIntervento == codIntervento }
+    }
+
+    override suspend fun aggiornaImpiantiGlobalmente(impiantoTemplate: Impianto) {
+        val list = getImpiantiCache()
+        for (i in list.indices) {
+            if (list[i].codIntervento == impiantoTemplate.codIntervento) {
+                list[i] = list[i].copy(
+                    nomeCompleto = impiantoTemplate.nomeCompleto,
+                    premessa = impiantoTemplate.premessa,
+                    listaAttivita = impiantoTemplate.listaAttivita,
+                    listaNormative = impiantoTemplate.listaNormative
+                    // id, cantiereId, quantita e noteSpecifiche rimangono inalterati
+                )
+            }
+        }
+        saveToDisk(list, getClientiCache(), getCantieriCache())
     }
 
     // === Clienti CRUD ===

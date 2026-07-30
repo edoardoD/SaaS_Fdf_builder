@@ -50,7 +50,8 @@ fun Sidebar(
 
     // Dialog per inserimento nuovo cliente
     if (showNuovoClienteDialog) {
-        NuovoClienteDialog(
+        ClienteDialog(
+            initialCliente = null,
             onDismiss = { showNuovoClienteDialog = false },
             onConfirm = { cliente ->
                 onAddCliente(cliente)
@@ -436,24 +437,25 @@ fun ClienteDropdown(
 }
 
 /**
- * Dialog per l'inserimento rapido di un nuovo cliente.
+ * Dialog per l'inserimento o modifica di un cliente.
  * Campi: Nome (obbligatorio), Indirizzo, Partita IVA.
  */
 @Composable
-fun NuovoClienteDialog(
+fun ClienteDialog(
+    initialCliente: Cliente? = null,
     onDismiss: () -> Unit,
     onConfirm: (Cliente) -> Unit
 ) {
-    var nome by remember { mutableStateOf("") }
-    var indirizzo by remember { mutableStateOf("") }
-    var partitaIva by remember { mutableStateOf("") }
+    var nome by remember { mutableStateOf(initialCliente?.nome ?: "") }
+    var indirizzo by remember { mutableStateOf(initialCliente?.indirizzo ?: "") }
+    var partitaIva by remember { mutableStateOf(initialCliente?.partitaIva ?: "") }
     var nomeError by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Nuovo Cliente",
+                text = if (initialCliente == null) "Nuovo Cliente" else "Modifica Cliente",
                 fontWeight = FontWeight.Bold
             )
         },
@@ -502,9 +504,10 @@ fun NuovoClienteDialog(
                     if (nome.isBlank()) {
                         nomeError = true
                     } else {
+                        val id = initialCliente?.id ?: UUID.randomUUID().toString()
                         onConfirm(
                             Cliente(
-                                id = UUID.randomUUID().toString(),
+                                id = id,
                                 nome = nome.trim(),
                                 indirizzo = indirizzo.trim().ifBlank { null },
                                 partitaIva = partitaIva.trim().ifBlank { null }
