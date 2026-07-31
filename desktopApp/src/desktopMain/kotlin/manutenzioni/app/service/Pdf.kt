@@ -9,10 +9,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-data class PdfConfig(
-    val templatePath: String = "scheletro.html",
-    val outputPath: String
-)
 
 class Pdf : IPdf {
     override fun buildPdf(htmlFilePath: String, pdfFilePath: String) {
@@ -22,8 +18,7 @@ class Pdf : IPdf {
             // Sarà necessario fornire dati giusti all'observer per far sì
             // che possa essere mostrato nella GUI l'errore
             if (!htmlFile.exists()) {
-                println("Errore: File HTML non trovato: $htmlFilePath")
-                return
+                throw IllegalStateException("Errore: File HTML non trovato: $htmlFilePath")
             }
 
             // 'use' chiude automaticamente htmlInput e il PDF alla fine del blocco
@@ -47,9 +42,9 @@ class Pdf : IPdf {
                 }
             }
         } catch (e: Exception) {
-
             println("Errore durante la conversione: ${e.message}")
             e.printStackTrace()
+            throw RuntimeException("Errore durante la conversione PDF: ${e.message}", e)
         }
     }
 }

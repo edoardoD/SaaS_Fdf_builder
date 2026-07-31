@@ -1,7 +1,7 @@
 package manutenzioni.domain.strategy
 
-import manutenzioni.app.data.Impianto
-import manutenzioni.app.data.Periodo
+import manutenzioni.domain.model.Impianto
+import manutenzioni.domain.model.Periodo
 import manutenzioni.domain.model.BatchResult
 import java.io.File
 

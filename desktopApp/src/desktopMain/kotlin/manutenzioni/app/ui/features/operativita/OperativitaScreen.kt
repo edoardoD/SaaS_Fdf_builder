@@ -17,8 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import manutenzioni.app.data.Cantiere
-import manutenzioni.app.data.Cliente
+import manutenzioni.domain.model.Cantiere
+import manutenzioni.domain.model.Cliente
 import manutenzioni.app.ui.ManutenzioniUiState
 import manutenzioni.app.ui.theme.*
 

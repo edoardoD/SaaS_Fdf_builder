@@ -1,7 +1,7 @@
 package manutenzioni.domain.service
 
-import manutenzioni.app.data.Attivita
-import manutenzioni.app.data.Periodo
+import manutenzioni.domain.model.Attivita
+import manutenzioni.domain.model.Periodo
 
 /**
  * Logica di frequenza inclusiva.

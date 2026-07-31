@@ -1,8 +1,8 @@
 package manutenzioni.domain
 
-import manutenzioni.app.data.Cantiere
-import manutenzioni.app.data.Cliente
-import manutenzioni.app.data.Impianto
+import manutenzioni.domain.model.Cantiere
+import manutenzioni.domain.model.Cliente
+import manutenzioni.domain.model.Impianto
 
 interface ManutenzioneRepository {
     suspend fun salvaImpianto(impianto: Impianto)

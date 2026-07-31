@@ -13,7 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import manutenzioni.app.data.*
+import manutenzioni.domain.model.*
+import manutenzioni.app.data.ManutenzioniDatabase
 
 /**
  * Editor universale per impianti — gestisce sia creazione che modifica.

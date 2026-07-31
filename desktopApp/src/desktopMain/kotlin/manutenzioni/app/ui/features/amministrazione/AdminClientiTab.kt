@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.util.UUID
-import manutenzioni.app.data.Cliente
+import manutenzioni.domain.model.Cliente
 import manutenzioni.app.ui.theme.SlateBorder
 
 @Composable

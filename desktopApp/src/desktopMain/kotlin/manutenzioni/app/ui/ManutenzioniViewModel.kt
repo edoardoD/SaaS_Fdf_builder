@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import manutenzioni.app.data.Cantiere
-import manutenzioni.app.data.Cliente
-import manutenzioni.app.data.Impianto
-import manutenzioni.app.data.Periodo
+import manutenzioni.domain.model.Cantiere
+import manutenzioni.domain.model.Cliente
+import manutenzioni.domain.model.Impianto
+import manutenzioni.domain.model.Periodo
 import manutenzioni.app.strategy.HtmlToPdfStrategy
 import manutenzioni.domain.ManutenzioneRepository
 import manutenzioni.domain.service.FrequencyFilter

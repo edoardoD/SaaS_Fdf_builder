@@ -1,7 +1,12 @@
 package manutenzioni.app.data
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import manutenzioni.domain.ManutenzioneRepository
+import manutenzioni.domain.model.Cantiere
+import manutenzioni.domain.model.Cliente
+import manutenzioni.domain.model.Impianto
 import java.io.File
 
 /**
@@ -14,6 +19,7 @@ class JsonManutenzioneRepository(
 ) : ManutenzioneRepository {
 
     private val dbFile: File = resolveDbPath(fileName)
+    private val mutex = Mutex()
 
     private val json = Json {
         prettyPrint = true
@@ -56,7 +62,7 @@ class JsonManutenzioneRepository(
 
             if (defaultJson != null) {
                 dbFile.writeText(defaultJson)
-                println("✓ Database demo copiato in: ${dbFile.absolutePath}")
+                println("✓ Database demo copiato in: \${dbFile.absolutePath}")
             } else {
                 // Crea un database vuoto
                 val emptyDb = ManutenzioniDatabase(emptyList(), emptyList(), emptyList())
@@ -122,7 +128,7 @@ class JsonManutenzioneRepository(
 
     // === Impianti CRUD ===
 
-    override suspend fun salvaImpianto(impianto: Impianto) {
+    override suspend fun salvaImpianto(impianto: Impianto) = mutex.withLock {
         val list = getImpiantiCache()
         val index = list.indexOfFirst { it.id == impianto.id }
         if (index >= 0) {
@@ -133,21 +139,21 @@ class JsonManutenzioneRepository(
         saveToDisk(list, getClientiCache(), getCantieriCache())
     }
 
-    override suspend fun caricaImpianti(): List<Impianto> {
+    override suspend fun caricaImpianti(): List<Impianto> = mutex.withLock {
         return getImpiantiCache().toList()
     }
 
-    override suspend fun eliminaImpianto(id: String) {
+    override suspend fun eliminaImpianto(id: String) = mutex.withLock {
         val list = getImpiantiCache()
         list.removeAll { it.id == id }
         saveToDisk(list, getClientiCache(), getCantieriCache())
     }
 
-    override suspend fun getImpianto(codIntervento: String): Impianto? {
+    override suspend fun getImpianto(codIntervento: String): Impianto? = mutex.withLock {
         return getImpiantiCache().find { it.codIntervento == codIntervento }
     }
 
-    override suspend fun aggiornaImpiantiGlobalmente(impiantoTemplate: Impianto) {
+    override suspend fun aggiornaImpiantiGlobalmente(impiantoTemplate: Impianto) = mutex.withLock {
         val list = getImpiantiCache()
         for (i in list.indices) {
             if (list[i].codIntervento == impiantoTemplate.codIntervento) {
@@ -165,11 +171,11 @@ class JsonManutenzioneRepository(
 
     // === Clienti CRUD ===
 
-    override suspend fun caricaClienti(): List<Cliente> {
+    override suspend fun caricaClienti(): List<Cliente> = mutex.withLock {
         return getClientiCache().toList()
     }
 
-    override suspend fun salvaCliente(cliente: Cliente) {
+    override suspend fun salvaCliente(cliente: Cliente) = mutex.withLock {
         val list = getClientiCache()
         val index = list.indexOfFirst { it.id == cliente.id }
         if (index >= 0) {
@@ -180,7 +186,7 @@ class JsonManutenzioneRepository(
         saveToDisk(getImpiantiCache(), list, getCantieriCache())
     }
 
-    override suspend fun updateCliente(id: String, newName: String) {
+    override suspend fun updateCliente(id: String, newName: String) = mutex.withLock {
         val list = getClientiCache()
         val index = list.indexOfFirst { it.id == id }
         if (index >= 0) {
@@ -190,7 +196,7 @@ class JsonManutenzioneRepository(
         }
     }
 
-    override suspend fun eliminaCliente(id: String) {
+    override suspend fun eliminaCliente(id: String) = mutex.withLock {
         val list = getClientiCache()
         list.removeAll { it.id == id }
         saveToDisk(getImpiantiCache(), list, getCantieriCache())
@@ -198,17 +204,17 @@ class JsonManutenzioneRepository(
 
     // === Getters for new workflow ===
 
-    override suspend fun getCantieriForCliente(clienteId: String): List<Cantiere> {
+    override suspend fun getCantieriForCliente(clienteId: String): List<Cantiere> = mutex.withLock {
         return getCantieriCache().filter { it.clienteId == clienteId }
     }
 
-    override suspend fun getImpiantiForCantiere(cantiereId: String): List<Impianto> {
+    override suspend fun getImpiantiForCantiere(cantiereId: String): List<Impianto> = mutex.withLock {
         return getImpiantiCache().filter { it.cantiereId == cantiereId }
     }
 
     // === Cantieri CRUD ===
 
-    override suspend fun salvaCantiere(cantiere: Cantiere) {
+    override suspend fun salvaCantiere(cantiere: Cantiere) = mutex.withLock {
         val list = getCantieriCache()
         val index = list.indexOfFirst { it.id == cantiere.id }
         if (index >= 0) {
@@ -219,7 +225,7 @@ class JsonManutenzioneRepository(
         saveToDisk(getImpiantiCache(), getClientiCache(), list)
     }
 
-    override suspend fun updateCantiere(id: String, newName: String) {
+    override suspend fun updateCantiere(id: String, newName: String) = mutex.withLock {
         val list = getCantieriCache()
         val index = list.indexOfFirst { it.id == id }
         if (index >= 0) {
@@ -229,7 +235,7 @@ class JsonManutenzioneRepository(
         }
     }
 
-    override suspend fun eliminaCantiere(id: String) {
+    override suspend fun eliminaCantiere(id: String) = mutex.withLock {
         val list = getCantieriCache()
         list.removeAll { it.id == id }
         saveToDisk(getImpiantiCache(), getClientiCache(), list)

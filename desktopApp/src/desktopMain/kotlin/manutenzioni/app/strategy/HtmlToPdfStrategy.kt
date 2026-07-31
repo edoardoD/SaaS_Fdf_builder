@@ -1,7 +1,7 @@
 package manutenzioni.app.strategy
 
-import manutenzioni.app.data.Impianto
-import manutenzioni.app.data.Periodo
+import manutenzioni.domain.model.Impianto
+import manutenzioni.domain.model.Periodo
 import manutenzioni.app.service.HtmlService
 import manutenzioni.app.service.Pdf
 import manutenzioni.domain.service.FrequencyFilter

@@ -1,8 +1,8 @@
 package manutenzioni.app.service
 
-import manutenzioni.app.data.Attivita
-import manutenzioni.app.data.Impianto
-import manutenzioni.app.data.Periodo
+import manutenzioni.domain.model.Attivita
+import manutenzioni.domain.model.Impianto
+import manutenzioni.domain.model.Periodo
 import manutenzioni.domain.service.Html
 import java.io.File
 import java.io.InputStream
@@ -23,11 +23,11 @@ class HtmlService(
      * @param clienteNome Nome del cliente da iniettare nell'header
      * @return il contenuto HTML come stringa
      */
-    fun buildHtml(
+    override fun buildHtml(
         impianto: Impianto,
         attivitaFiltrate: List<Attivita>,
         frequenza: Periodo,
-        clienteNome: String? = null
+        clienteNome: String?
     ): String {
         var html = loadTemplate()
 
@@ -59,14 +59,7 @@ class HtmlService(
         return html
     }
 
-    /**
-     * Implementazione dell'interfaccia Html — metodo generico con mappa.
-     * Per un controllo più fine, usare buildHtml() direttamente.
-     */
-    override fun fillHtml(map: Map<String, Any?>) {
-        // Delegato all'approccio type-safe buildHtml()
-        // Questo metodo è mantenuto per retrocompatibilità con l'interfaccia
-    }
+    // Metodo legacy `fillHtml` rimosso secondo il refactoring plan
 
     private fun loadTemplate(): String {
         // 1. Cerca nel classpath (resources)

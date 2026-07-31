@@ -14,8 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.util.UUID
-import manutenzioni.app.data.Cantiere
-import manutenzioni.app.data.Cliente
+import manutenzioni.domain.model.Cantiere
+import manutenzioni.domain.model.Cliente
 import manutenzioni.app.ui.features.operativita.ClienteSelector
 import manutenzioni.app.ui.theme.SlateBorder
 

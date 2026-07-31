@@ -476,9 +476,24 @@ git tag v1.0.0 && git push origin v1.0.0
 
 ---
 
+## 11. 🤖 Ecosistema Multi-Agente (Skills)
+
+Il progetto utilizza un setup agentico specializzato per mantenere la Clean Architecture. Nella directory `.agents/skills/` sono definiti i seguenti ruoli:
+
+1. **`model_agent`:** Focus sul Data Layer, Domain Layer, Persistenza e @Serializable. Nessuna dipendenza UI consentita.
+2. **`controller_agent`:** Focus sui ViewModel, StateFlow e Service/Strategy Layer. Gestisce le logiche asincrone e di business, senza toccare Compose.
+3. **`view_agent`:** Focus esclusivo sulle View in Compose Desktop (UI, layout, interazioni). Non altera lo stato globale direttamente.
+4. **`refactoring_agent`:** Focus trasversale sulla qualità del codice, risoluzione debiti tecnici e applicazione dello stile Kotlin idiomatico.
+5. **`develop` (Orchestratore):** Invocando l'azione `/develop` questo skill coordina in sequenza logica Model -> Controller -> View per implementare aggiornamenti complessi rispettando il ciclo vitale.
+
+Quando affronti un task, adotta mentalmente il ruolo appropriato o invoca lo skill specifico.
+
+---
+
 > **📌 Nota finale per il prossimo agente:**
 > Prima di iniziare qualsiasi task, leggi questo file **per intero**.
 > Se il task modifica la struttura dei dati → Sezione 6.1 (Checklist Nuove Feature).
 > Se il task è un refactoring → Sezione 6.2.
 > Se hai un dubbio su una scelta architetturale → Sezione 2 (Guardrails) e Sezione 7 (Anti-Pattern).
+> Verifica quale **Agente/Skill** è più adatto al tuo task attuale.
 > La regola `F.inMesi() % A.frequenza.inMesi() == 0` in `FrequencyFilter.kt` è la **Stella Polare**. Non si tocca senza review esplicita.

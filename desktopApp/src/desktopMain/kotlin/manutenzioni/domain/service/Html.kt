@@ -1,10 +1,23 @@
 package manutenzioni.domain.service
 
+import manutenzioni.domain.model.Attivita
+import manutenzioni.domain.model.Impianto
+import manutenzioni.domain.model.Periodo
+
 interface Html {
     /**
-     * Accetta una mappa di parametri, la chiave è l'id da cercare nel file
-     * html e fillare mentre il value è il valore da mettere nel tag corrispondente alla chiave
-     * dopo di che, si interroga il Nosql db per riempire il file delle righe corrispondenti*/
-    fun fillHtml(map: Map<String, Any?>)
-
+     * Genera l'HTML completo con i dati dell'impianto e le attività filtrate.
+     *
+     * @param impianto L'impianto selezionato
+     * @param attivitaFiltrate Le attività filtrate in base alla frequenza
+     * @param frequenza La frequenza dell'intervento
+     * @param clienteNome Nome del cliente da iniettare nell'header (opzionale)
+     * @return il contenuto HTML come stringa
+     */
+    fun buildHtml(
+        impianto: Impianto,
+        attivitaFiltrate: List<Attivita>,
+        frequenza: Periodo,
+        clienteNome: String? = null
+    ): String
 }

@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import manutenzioni.app.data.Impianto
-import manutenzioni.app.data.Periodo
+import manutenzioni.domain.model.Impianto
+import manutenzioni.domain.model.Periodo
 import manutenzioni.app.ui.ImpiantoEditor
 import manutenzioni.app.ui.ImpiantoSelectionList
 import manutenzioni.app.ui.ManutenzioniUiState
