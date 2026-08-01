@@ -273,7 +273,23 @@ class ManutenzioniViewModel(
         } else {
             updatedSelection.remove(impiantoId)
         }
-        _uiState.update { it.copy(impiantiSelezionati = updatedSelection) }
+
+        // Ricalcola le frequenze unendo tutte le attività degli impianti attualmente selezionati
+        val impiantiSelezionatiIds = updatedSelection.filter { it.value }.keys
+        val attivitaSelezionate = _uiState.value.impiantiDelCantiere
+            .filter { it.codIntervento in impiantiSelezionatiIds }
+            .flatMap { it.listaAttivita }
+            
+        val nuoveFrequenze = FrequencyFilter.frequenzeDisponibili(attivitaSelezionate)
+
+        _uiState.update { state ->
+            state.copy(
+                impiantiSelezionati = updatedSelection,
+                frequenzeDisponibili = nuoveFrequenze,
+                // Resetta la frequenza selezionata se non è più valida per la nuova selezione
+                selectedFrequenza = if (nuoveFrequenze.contains(state.selectedFrequenza)) state.selectedFrequenza else null
+            )
+        }
     }
 
     /** Seleziona una frequenza e genera automaticamente il PDF */
