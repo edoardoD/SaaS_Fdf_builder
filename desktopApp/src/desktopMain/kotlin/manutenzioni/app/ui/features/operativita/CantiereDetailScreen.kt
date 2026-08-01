@@ -146,6 +146,9 @@ fun CantiereDetailScreen(
                     onDeleteImpianto = { impianto ->
                         impiantoInEliminazione = impianto
                         showDeleteImpiantoDialog = true
+                    },
+                    onQuantitaChanged = { impianto, nuovaQ ->
+                        onSaveImpianto(impianto.copy(quantita = nuovaQ))
                     }
                 )
             }

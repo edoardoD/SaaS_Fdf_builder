@@ -7,11 +7,12 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import manutenzioni.domain.model.Impianto
 
 @Composable
@@ -21,6 +22,7 @@ fun ImpiantoSelectionList(
     onSelectionChanged: (String, Boolean) -> Unit,
     onEditImpianto: (Impianto) -> Unit,
     onDeleteImpianto: (Impianto) -> Unit,
+    onQuantitaChanged: (Impianto, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (impianti.isEmpty()) {
@@ -72,6 +74,22 @@ fun ImpiantoSelectionList(
                             )
                         }
                         
+                        var textQuantita by remember(impianto.quantita) { mutableStateOf(impianto.quantita.toString()) }
+                        OutlinedTextField(
+                            value = textQuantita,
+                            onValueChange = { newValue ->
+                                textQuantita = newValue
+                                val intVal = newValue.toIntOrNull()
+                                if (intVal != null && intVal > 0) {
+                                    onQuantitaChanged(impianto, intVal)
+                                }
+                            },
+                            label = { Text("Q.tà", fontSize = 10.sp) },
+                            modifier = Modifier.width(64.dp).padding(end = 8.dp),
+                            singleLine = true,
+                            textStyle = LocalTextStyle.current.copy(fontSize = 12.sp)
+                        )
+
                         Row {
                             IconButton(onClick = { onEditImpianto(impianto) }) {
                                 Icon(

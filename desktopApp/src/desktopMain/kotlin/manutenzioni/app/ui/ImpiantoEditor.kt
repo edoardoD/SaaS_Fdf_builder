@@ -175,16 +175,18 @@ fun ImpiantoEditor(
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 4
                 )
-                OutlinedTextField(
-                    value = quantita,
-                    onValueChange = { quantita = it },
-                    label = { Text("Quantità *") },
-                    modifier = Modifier.fillMaxWidth(0.3f),
-                    singleLine = true,
-                    readOnly = false, // Sempre editabile a livello di cantiere
-                    enabled = true,
-                    textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
-                )
+                if (impianto.cantiereId != null) {
+                    OutlinedTextField(
+                        value = quantita,
+                        onValueChange = { quantita = it },
+                        label = { Text("Quantità *") },
+                        modifier = Modifier.fillMaxWidth(0.3f),
+                        singleLine = true,
+                        readOnly = false, // Sempre editabile a livello di cantiere
+                        enabled = true,
+                        textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
+                    )
+                }
             }
 
             if (!isReadOnlyAdminFields && !isNew) {
