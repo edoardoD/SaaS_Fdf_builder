@@ -51,7 +51,8 @@ fun AdminDashboardScreen(
                     AdminClientiTab(
                         clienti = state.clienti,
                         onAddCliente = { viewModel.addCliente(it) }, // Passare viewModel in qualche modo o delegare
-                        onRenameCliente = { id, name -> viewModel.renameCliente(id, name) }
+                        onRenameCliente = { id, name -> viewModel.renameCliente(id, name) },
+                        onDeleteCliente = { viewModel.deleteCliente(it) }
                     )
                 }
                 AdminTab.CANTIERI -> {

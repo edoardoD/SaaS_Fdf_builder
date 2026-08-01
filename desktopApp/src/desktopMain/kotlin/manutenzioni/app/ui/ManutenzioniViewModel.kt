@@ -192,6 +192,33 @@ class ManutenzioniViewModel(
         }
     }
 
+    fun deleteCliente(id: String) {
+        scope.launch {
+            try {
+                repository.eliminaCliente(id)
+                val clienti = repository.caricaClienti()
+                _uiState.update { state -> 
+                    // Se stavamo visualizzando proprio il cliente eliminato, chiudiamo tutto a cascata
+                    val isCurrent = state.selectedCliente?.id == id
+                    state.copy(
+                        clienti = clienti,
+                        selectedCliente = if (isCurrent) null else state.selectedCliente,
+                        cantieriDisponibili = if (isCurrent) emptyList() else state.cantieriDisponibili,
+                        selectedCantiere = if (isCurrent) null else state.selectedCantiere,
+                        impiantiDelCantiere = if (isCurrent) emptyList() else state.impiantiDelCantiere,
+                        impiantiSelezionati = if (isCurrent) emptyMap() else state.impiantiSelezionati,
+                        frequenzeDisponibili = if (isCurrent) emptyList() else state.frequenzeDisponibili,
+                        selectedImpianto = if (isCurrent) null else state.selectedImpianto,
+                        statusMessage = "✓ Cliente eliminato con successo",
+                        errorMessage = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Errore eliminazione cliente: ${e.message}") }
+            }
+        }
+    }
+
     fun addCantiere(cantiere: Cantiere) {
         scope.launch {
             try {
@@ -508,6 +535,53 @@ class ManutenzioniViewModel(
                 _uiState.update {
                     it.copy(errorMessage = "Errore salvataggio: ${e.message}")
                 }
+            }
+        }
+    }
+
+    fun deleteImpianto(id: String) {
+        scope.launch {
+            try {
+                // Troviamo prima il codIntervento per pulire le selezioni
+                val impiantoDaEliminare = _uiState.value.impiantiDelCantiere.find { it.id == id } ?: _uiState.value.impianti.find { it.id == id }
+                val codIntervento = impiantoDaEliminare?.codIntervento
+                
+                repository.eliminaImpianto(id)
+                val impiantiAggiornati = repository.caricaImpianti()
+                
+                val cantiereId = _uiState.value.selectedCantiere?.id
+                val impiantiDelCantiereAggiornati = cantiereId?.let { 
+                    repository.getImpiantiForCantiere(it) 
+                } ?: emptyList()
+                
+                _uiState.update { state ->
+                    val isCurrent = state.selectedImpianto?.id == id
+                    val updatedSelection = state.impiantiSelezionati.toMutableMap()
+                    
+                    if (codIntervento != null) {
+                        updatedSelection.remove(codIntervento)
+                    }
+
+                    // Ricalcolo frequenze dinamico
+                    val impiantiSelezionatiIds = updatedSelection.filter { it.value }.keys
+                    val attivitaSelezionate = impiantiDelCantiereAggiornati
+                        .filter { it.codIntervento in impiantiSelezionatiIds }
+                        .flatMap { it.listaAttivita }
+                    val nuoveFrequenze = FrequencyFilter.frequenzeDisponibili(attivitaSelezionate)
+                    
+                    state.copy(
+                        impianti = impiantiAggiornati,
+                        impiantiDelCantiere = impiantiDelCantiereAggiornati,
+                        selectedImpianto = if (isCurrent) null else state.selectedImpianto,
+                        impiantiSelezionati = updatedSelection,
+                        frequenzeDisponibili = nuoveFrequenze,
+                        selectedFrequenza = if (nuoveFrequenze.contains(state.selectedFrequenza)) state.selectedFrequenza else null,
+                        statusMessage = "✓ Impianto eliminato con successo",
+                        errorMessage = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Errore eliminazione impianto: ${e.message}") }
             }
         }
     }

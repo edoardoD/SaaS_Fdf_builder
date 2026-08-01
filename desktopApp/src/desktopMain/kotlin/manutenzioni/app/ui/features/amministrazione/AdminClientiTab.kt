@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,12 +22,15 @@ import manutenzioni.app.ui.theme.SlateBorder
 fun AdminClientiTab(
     clienti: List<Cliente>,
     onAddCliente: (Cliente) -> Unit,
-    onRenameCliente: (String, String) -> Unit
+    onRenameCliente: (String, String) -> Unit,
+    onDeleteCliente: (String) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var clienteInModifica by remember { mutableStateOf<Cliente?>(null) }
     var renameText by remember { mutableStateOf("") }
     var showRenameDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var clienteInEliminazione by remember { mutableStateOf<Cliente?>(null) }
 
     if (showDialog) {
         ClienteDialog(
@@ -70,6 +74,35 @@ fun AdminClientiTab(
         )
     }
 
+    if (showDeleteConfirmDialog && clienteInEliminazione != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmDialog = false },
+            title = { Text("Elimina Cliente") },
+            text = {
+                Text(
+                    "Sei sicuro di voler eliminare il cliente '${clienteInEliminazione!!.nome}'?\n\n" +
+                    "Questa operazione eliminerà definitivamente a cascata tutti i suoi cantieri e impianti associati. L'azione non è reversibile."
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDeleteCliente(clienteInEliminazione!!.id)
+                        showDeleteConfirmDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error, contentColor = MaterialTheme.colors.onError)
+                ) {
+                    Text("Elimina")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmDialog = false }) {
+                    Text("Annulla")
+                }
+            }
+        )
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
@@ -103,12 +136,20 @@ fun AdminClientiTab(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(cliente.nome, style = MaterialTheme.typography.body1)
-                            IconButton(onClick = {
-                                clienteInModifica = cliente
-                                renameText = cliente.nome
-                                showRenameDialog = true
-                            }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Modifica", tint = MaterialTheme.colors.primary)
+                            Row {
+                                IconButton(onClick = {
+                                    clienteInModifica = cliente
+                                    renameText = cliente.nome
+                                    showRenameDialog = true
+                                }) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Modifica", tint = MaterialTheme.colors.primary)
+                                }
+                                IconButton(onClick = {
+                                    clienteInEliminazione = cliente
+                                    showDeleteConfirmDialog = true
+                                }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Elimina", tint = MaterialTheme.colors.error)
+                                }
                             }
                         }
                     }

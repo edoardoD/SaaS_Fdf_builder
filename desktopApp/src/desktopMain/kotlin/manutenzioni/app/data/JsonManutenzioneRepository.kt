@@ -197,9 +197,18 @@ class JsonManutenzioneRepository(
     }
 
     override suspend fun eliminaCliente(id: String) = mutex.withLock {
-        val list = getClientiCache()
-        list.removeAll { it.id == id }
-        saveToDisk(getImpiantiCache(), list, getCantieriCache())
+        val listClienti = getClientiCache()
+        listClienti.removeAll { it.id == id }
+        
+        val listCantieri = getCantieriCache()
+        val cantieriDaEliminare = listCantieri.filter { it.clienteId == id }.map { it.id }.toSet()
+        listCantieri.removeAll { it.clienteId == id }
+        
+        val listImpianti = getImpiantiCache()
+        // Gli impianti template hanno cantiereId = null, quindi non verranno mai eliminati da questa operazione
+        listImpianti.removeAll { it.cantiereId != null && it.cantiereId in cantieriDaEliminare }
+        
+        saveToDisk(listImpianti, listClienti, listCantieri)
     }
 
     // === Getters for new workflow ===

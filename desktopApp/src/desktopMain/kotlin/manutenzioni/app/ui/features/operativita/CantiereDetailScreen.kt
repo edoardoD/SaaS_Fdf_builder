@@ -30,11 +30,14 @@ fun CantiereDetailScreen(
     onFrequenzaSelected: (Periodo) -> Unit,
     onGeneraPdf: () -> Unit,
     onOpenPdf: () -> Unit,
-    onCreateNewImpianto: (Impianto?, Int) -> Unit
+    onCreateNewImpianto: (Impianto?, Int) -> Unit,
+    onDeleteImpianto: (String) -> Unit
 ) {
     // Gestione visualizzazione ImpiantoEditor
     var impiantoInModifica by remember { mutableStateOf<Impianto?>(null) }
     var showNuovoImpiantoDialog by remember { mutableStateOf(false) }
+    var showDeleteImpiantoDialog by remember { mutableStateOf(false) }
+    var impiantoInEliminazione by remember { mutableStateOf<Impianto?>(null) }
 
     if (impiantoInModifica != null) {
         Box(modifier = Modifier.fillMaxSize().padding(32.dp)) {
@@ -62,6 +65,35 @@ fun CantiereDetailScreen(
             onConfirm = { template, quantita ->
                 onCreateNewImpianto(template, quantita)
                 showNuovoImpiantoDialog = false
+            }
+        )
+    }
+
+    if (showDeleteImpiantoDialog && impiantoInEliminazione != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteImpiantoDialog = false },
+            title = { Text("Elimina Impianto") },
+            text = {
+                Text(
+                    "Sei sicuro di voler eliminare l'impianto '${impiantoInEliminazione!!.nomeCompleto}'?\n\n" +
+                    "Questa operazione lo eliminerà definitivamente dal database. L'azione non è reversibile."
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDeleteImpianto(impiantoInEliminazione!!.id)
+                        showDeleteImpiantoDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error, contentColor = MaterialTheme.colors.onError)
+                ) {
+                    Text("Elimina")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteImpiantoDialog = false }) {
+                    Text("Annulla")
+                }
             }
         )
     }
@@ -110,6 +142,10 @@ fun CantiereDetailScreen(
                     onEditImpianto = { impianto -> 
                         impiantoInModifica = impianto 
                         onEditImpianto(impianto)
+                    },
+                    onDeleteImpianto = { impianto ->
+                        impiantoInEliminazione = impianto
+                        showDeleteImpiantoDialog = true
                     }
                 )
             }

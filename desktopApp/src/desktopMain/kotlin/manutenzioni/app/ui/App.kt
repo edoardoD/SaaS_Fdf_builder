@@ -45,7 +45,8 @@ fun App(viewModel: ManutenzioniViewModel) {
                                 onFrequenzaSelected = viewModel::selectFrequenza,
                                 onGeneraPdf = viewModel::generatePdf,
                                 onOpenPdf = viewModel::openPdfInSystem,
-                                onCreateNewImpianto = viewModel::createNewImpianto
+                                onCreateNewImpianto = viewModel::createNewImpianto,
+                                onDeleteImpianto = viewModel::deleteImpianto
                             )
                         }
                     }

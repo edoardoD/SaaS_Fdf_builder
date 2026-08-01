@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,6 +20,7 @@ fun ImpiantoSelectionList(
     selectionState: Map<String, Boolean>,
     onSelectionChanged: (String, Boolean) -> Unit,
     onEditImpianto: (Impianto) -> Unit,
+    onDeleteImpianto: (Impianto) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (impianti.isEmpty()) {
@@ -70,12 +72,21 @@ fun ImpiantoSelectionList(
                             )
                         }
                         
-                        IconButton(onClick = { onEditImpianto(impianto) }) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Modifica impianto",
-                                tint = MaterialTheme.colors.primary
-                            )
+                        Row {
+                            IconButton(onClick = { onEditImpianto(impianto) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Modifica impianto",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            }
+                            IconButton(onClick = { onDeleteImpianto(impianto) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Elimina impianto",
+                                    tint = MaterialTheme.colors.error
+                                )
+                            }
                         }
                     }
                 }
