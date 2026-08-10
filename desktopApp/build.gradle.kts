@@ -31,6 +31,10 @@ kotlin {
                 // Serializzazione JSON
                 implementation(libs.kotlinx.serialization.json)
 
+                // MongoDB
+                implementation(libs.mongodb.driver.kotlin.coroutine)
+                implementation(libs.bson.kotlinx)
+
                 // Coroutines
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.coroutines.swing)

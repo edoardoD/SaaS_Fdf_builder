@@ -30,7 +30,7 @@ private fun saveCrashLog(e: Throwable) {
 }
 
 fun startApp() = application {
-    val repository = JsonManutenzioneRepository()
+    val repository = manutenzioni.app.data.MongoManutenzioneRepository()
     val viewModel = ManutenzioniViewModel(repository)
 
     Window(
