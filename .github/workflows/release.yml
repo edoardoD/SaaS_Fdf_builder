@@ -64,7 +64,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 🏗️ Build installer & UberJar
-        run: ./gradlew :desktopApp:${{ matrix.task }} :desktopApp:packageUberJarForCurrentOS
+        run: ./gradlew -Dorg.gradle.java.home="$JAVA_HOME" :desktopApp:${{ matrix.task }} :desktopApp:packageUberJarForCurrentOS
 
       - name: 🔄 Rename UberJar
         shell: bash
