@@ -466,7 +466,7 @@ class ManutenzioniViewModel(
 
     /**
      * Crea un nuovo impianto vuoto, lo seleziona e apre l'editor.
-     * L'utente potrà compilare codice, nome, premessa e attività dall'editor.
+     * Se è passato un template, lo persiste direttamente per il cantiere.
      */
     fun createNewImpianto(template: Impianto? = null, quantita: Int = 1) {
         val newImpianto = template?.copy(
@@ -482,15 +482,19 @@ class ManutenzioniViewModel(
             cantiereId = _uiState.value.selectedCantiere?.id,
             quantita = quantita
         )
-        _uiState.update {
-            it.copy(
-                selectedImpianto = newImpianto,
-                frequenzeDisponibili = emptyList(),
-                selectedFrequenza = null,
-                pdfFile = null,
-                statusMessage = "Nuovo impianto — compila i dati e salva",
-                errorMessage = null
-            )
+        if (template != null) {
+            saveImpianto(newImpianto)
+        } else {
+            _uiState.update {
+                it.copy(
+                    selectedImpianto = newImpianto,
+                    frequenzeDisponibili = emptyList(),
+                    selectedFrequenza = null,
+                    pdfFile = null,
+                    statusMessage = "Nuovo impianto — compila i dati e salva",
+                    errorMessage = null
+                )
+            }
         }
     }
 
@@ -514,6 +518,7 @@ class ManutenzioniViewModel(
             try {
                 repository.salvaImpianto(impianto)
                 val impiantiAggiornati = repository.caricaImpianti()
+                loadImpiantiGlobali()
                 val frequenze = FrequencyFilter.frequenzeDisponibili(impianto.listaAttivita)
                 
                 // Aggiorna la lista degli impianti del cantiere corrente

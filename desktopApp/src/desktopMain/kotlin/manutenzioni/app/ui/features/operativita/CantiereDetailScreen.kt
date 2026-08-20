@@ -63,7 +63,19 @@ fun CantiereDetailScreen(
             impiantiGlobali = state.impiantiGlobali,
             onDismiss = { showNuovoImpiantoDialog = false },
             onConfirm = { template, quantita ->
-                onCreateNewImpianto(template, quantita)
+                if (template != null) {
+                    onCreateNewImpianto(template, quantita)
+                } else {
+                    impiantoInModifica = Impianto(
+                        id = java.util.UUID.randomUUID().toString(),
+                        codIntervento = "",
+                        nomeCompleto = "",
+                        premessa = null,
+                        listaAttivita = emptyList(),
+                        cantiereId = state.selectedCantiere?.id,
+                        quantita = quantita
+                    )
+                }
                 showNuovoImpiantoDialog = false
             }
         )

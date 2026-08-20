@@ -102,26 +102,20 @@ fun OperativitaScreen(
 
         // Cantieri Grid
         if (state.selectedCliente != null) {
-            if (state.cantieriDisponibili.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Nessun cantiere disponibile per questo cliente.", color = MaterialTheme.colors.secondary)
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 300.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                item {
+                    AddCantiereCard(onClick = { showNuovoCantiereDialog = true })
                 }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 300.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    item {
-                        AddCantiereCard(onClick = { showNuovoCantiereDialog = true })
-                    }
-                    items(state.cantieriDisponibili) { cantiere ->
-                        CantiereCard(
-                            cantiere = cantiere,
-                            onClick = { onCantiereSelected(cantiere) }
-                        )
-                    }
+                items(state.cantieriDisponibili) { cantiere ->
+                    CantiereCard(
+                        cantiere = cantiere,
+                        onClick = { onCantiereSelected(cantiere) }
+                    )
                 }
             }
         }

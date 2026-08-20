@@ -33,7 +33,7 @@ class JsonManutenzioneRepository(
     private var cacheCantieri: MutableList<Cantiere>? = null
 
     init {
-        println("📂 Database log: \${dbFile.absolutePath}")
+        println("📂 Database log: ${dbFile.absolutePath}")
         copyDefaultIfMissing()
     }
 
@@ -62,7 +62,7 @@ class JsonManutenzioneRepository(
 
             if (defaultJson != null) {
                 dbFile.writeText(defaultJson)
-                println("✓ Database demo copiato in: \${dbFile.absolutePath}")
+                println("✓ Database demo copiato in: ${dbFile.absolutePath}")
             } else {
                 // Crea un database vuoto
                 val emptyDb = ManutenzioniDatabase(emptyList(), emptyList(), emptyList())
@@ -77,7 +77,7 @@ class JsonManutenzioneRepository(
             val content = dbFile.readText()
             json.decodeFromString(ManutenzioniDatabase.serializer(), content)
         } catch (e: Exception) {
-            println("Errore nel caricamento del database: \${e.message}")
+            println("Errore nel caricamento del database: ${e.message}")
             ManutenzioniDatabase(emptyList(), emptyList(), emptyList())
         }
     }
@@ -155,8 +155,12 @@ class JsonManutenzioneRepository(
 
     override suspend fun aggiornaImpiantiGlobalmente(impiantoTemplate: Impianto) = mutex.withLock {
         val list = getImpiantiCache()
+        var hasGlobal = false
         for (i in list.indices) {
             if (list[i].codIntervento == impiantoTemplate.codIntervento) {
+                if (list[i].cantiereId == null) {
+                    hasGlobal = true
+                }
                 list[i] = list[i].copy(
                     nomeCompleto = impiantoTemplate.nomeCompleto,
                     premessa = impiantoTemplate.premessa,
@@ -165,6 +169,9 @@ class JsonManutenzioneRepository(
                     // id, cantiereId, quantita e noteSpecifiche rimangono inalterati
                 )
             }
+        }
+        if (!hasGlobal) {
+            list.add(impiantoTemplate.copy(cantiereId = null))
         }
         saveToDisk(list, getClientiCache(), getCantieriCache())
     }

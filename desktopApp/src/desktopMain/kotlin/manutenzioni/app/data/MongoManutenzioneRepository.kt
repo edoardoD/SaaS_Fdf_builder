@@ -1,5 +1,6 @@
 package manutenzioni.app.data
 
+import com.mongodb.client.model.Filters.`in`
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.ReplaceOptions
 import com.mongodb.kotlin.client.coroutine.MongoClient
@@ -42,7 +43,11 @@ class MongoManutenzioneRepository(connectionString: String = "mongodb://localhos
     override suspend fun aggiornaImpiantiGlobalmente(impiantoTemplate: Impianto) {
         // Update all impianti with the same codIntervento
         val impianti = impiantiCollection.find(eq("codIntervento", impiantoTemplate.codIntervento)).toList()
+        var hasGlobal = false
         for (imp in impianti) {
+            if (imp.cantiereId == null) {
+                hasGlobal = true
+            }
             val updated = impiantoTemplate.copy(
                 id = imp.id, 
                 cantiereId = imp.cantiereId, 
@@ -50,6 +55,9 @@ class MongoManutenzioneRepository(connectionString: String = "mongodb://localhos
                 noteSpecifiche = imp.noteSpecifiche
             )
             salvaImpianto(updated)
+        }
+        if (!hasGlobal) {
+            salvaImpianto(impiantoTemplate.copy(cantiereId = null))
         }
     }
 
@@ -73,6 +81,12 @@ class MongoManutenzioneRepository(connectionString: String = "mongodb://localhos
     }
 
     override suspend fun eliminaCliente(id: String) {
+        val cantieri = cantieriCollection.find(eq("clienteId", id)).toList()
+        val cantiereIds = cantieri.map { it.id }
+        if (cantiereIds.isNotEmpty()) {
+            impiantiCollection.deleteMany(`in`("cantiereId", cantiereIds))
+            cantieriCollection.deleteMany(eq("clienteId", id))
+        }
         clientiCollection.deleteOne(eq("id", id))
     }
 
@@ -100,6 +114,7 @@ class MongoManutenzioneRepository(connectionString: String = "mongodb://localhos
     }
 
     override suspend fun eliminaCantiere(id: String) {
+        impiantiCollection.deleteMany(eq("cantiereId", id))
         cantieriCollection.deleteOne(eq("id", id))
     }
 }

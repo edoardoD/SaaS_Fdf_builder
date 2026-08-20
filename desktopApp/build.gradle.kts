@@ -58,7 +58,7 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "manutenzioni.app.MainKt"
+        mainClass = (project.findProperty("mainClass") as? String) ?: "manutenzioni.app.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
