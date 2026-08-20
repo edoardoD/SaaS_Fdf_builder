@@ -13,7 +13,7 @@ import manutenzioni.app.ui.layout.MainScaffold
 import manutenzioni.app.ui.theme.ManutenzioniTheme
 
 @Composable
-fun App(viewModel: ManutenzioniViewModel) {
+fun App(viewModel: ManutenzioniViewModel, onDisconnect: () -> Unit = {}) {
     val uiState by viewModel.uiState.collectAsState()
 
     ManutenzioniTheme {
@@ -54,7 +54,8 @@ fun App(viewModel: ManutenzioniViewModel) {
                         AdminDashboardScreen(
                             state = uiState,
                             viewModel = viewModel,
-                            onTabSelected = viewModel::setAdminTab
+                            onTabSelected = viewModel::setAdminTab,
+                            onDisconnect = onDisconnect
                         )
                     }
                 }

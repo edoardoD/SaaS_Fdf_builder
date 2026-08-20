@@ -11,9 +11,12 @@ import manutenzioni.domain.model.Cantiere
 import manutenzioni.domain.model.Cliente
 import manutenzioni.domain.model.Impianto
 
-class MongoManutenzioneRepository(connectionString: String = "mongodb://localhost:27017") : ManutenzioneRepository {
+class MongoManutenzioneRepository(
+    connectionString: String = "mongodb://localhost:27017",
+    dbName: String = "manutenzioni_db"
+) : ManutenzioneRepository {
     private val client = MongoClient.create(connectionString)
-    private val database = client.getDatabase("manutenzioni_db")
+    private val database = client.getDatabase(dbName)
 
     private val impiantiCollection = database.getCollection<Impianto>("impianti")
     private val clientiCollection = database.getCollection<Cliente>("clienti")
