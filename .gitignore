@@ -157,3 +157,5 @@ gradle-app.setting
 /desktopApp/csv/TRFO.csv
 /desktopApp/csv/TRFS.csv
 /desktopApp/csv/UPS.csv
+
+/mongo_data
