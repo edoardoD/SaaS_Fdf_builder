@@ -27,6 +27,8 @@ import kotlinx.coroutines.withContext
 import manutenzioni.app.data.AppConfigRepository
 import manutenzioni.app.ui.features.config.ConnectionScreen
 
+import kotlinx.coroutines.withTimeout
+
 fun main() {
     try {
         startApp()
@@ -42,7 +44,7 @@ private fun saveCrashLog(e: Throwable) {
     val userHome = System.getProperty("user.home")
     val desktop = File(userHome, "Desktop")
     val logFile = File(desktop, "manutenzioni_maker_crash.log")
-    logFile.writeText("CRASH RILEVATO ALL'AVVIO\n\n\${sw.toString()}")
+    logFile.writeText("CRASH RILEVATO ALL'AVVIO\n\n${sw.toString()}")
 }
 
 fun startApp() = application {
@@ -55,14 +57,16 @@ fun startApp() = application {
         if (currentConfig != null && repository == null) {
             isTryingToConnect = true
             try {
-                val connectionString = AppConfigRepository.buildConnectionString(currentConfig)
-                val repo = withContext(Dispatchers.IO) {
-                    manutenzioni.app.data.MongoManutenzioneRepository(connectionString, currentConfig.dbName)
+                withTimeout(5000L) { // Timeout di 5 secondi per il tentativo automatico
+                    val connectionString = AppConfigRepository.buildConnectionString(currentConfig)
+                    val repo = withContext(Dispatchers.IO) {
+                        manutenzioni.app.data.MongoManutenzioneRepository(connectionString, currentConfig.dbName)
+                    }
+                    withContext(Dispatchers.IO) {
+                        repo.caricaClienti() // simple ping test
+                    }
+                    repository = repo
                 }
-                withContext(Dispatchers.IO) {
-                    repo.caricaClienti() // simple ping test
-                }
-                repository = repo
             } catch (e: Exception) {
                 e.printStackTrace()
                 config = null

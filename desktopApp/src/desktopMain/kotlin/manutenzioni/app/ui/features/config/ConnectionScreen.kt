@@ -156,7 +156,7 @@ fun ConnectionScreen(
                                         testResult = "Connessione stabilita con successo!"
                                     } catch (e: Exception) {
                                         testIsSuccess = false
-                                        testResult = "Errore di connessione: \${e.message}"
+                                        testResult = "Errore di connessione: ${e.message}"
                                     } finally {
                                         isTesting = false
                                     }
@@ -193,7 +193,7 @@ fun ConnectionScreen(
                                         onConnected(repo, config)
                                     } catch (e: Exception) {
                                         testIsSuccess = false
-                                        testResult = "Errore di connessione: \${e.message}"
+                                        testResult = "Errore di connessione: ${e.message}"
                                     } finally {
                                         isTesting = false
                                     }
