@@ -58,7 +58,7 @@ fun AdminImpiantiGlobaliTab(
             }
             
             Button(onClick = {
-                val nuovo = Impianto(
+                val nuovo = manutenzioni.domain.model.ImpiantoStandard(
                     id = UUID.randomUUID().toString(),
                     codIntervento = "NUOVO",
                     nomeCompleto = "Nuovo Modello",

@@ -66,7 +66,7 @@ fun CantiereDetailScreen(
                 if (template != null) {
                     onCreateNewImpianto(template, quantita)
                 } else {
-                    impiantoInModifica = Impianto(
+                    impiantoInModifica = manutenzioni.domain.model.ImpiantoStandard(
                         id = java.util.UUID.randomUUID().toString(),
                         codIntervento = "",
                         nomeCompleto = "",
@@ -160,7 +160,7 @@ fun CantiereDetailScreen(
                         showDeleteImpiantoDialog = true
                     },
                     onQuantitaChanged = { impianto, nuovaQ ->
-                        onSaveImpianto(impianto.copy(quantita = nuovaQ))
+                        onSaveImpianto(impianto.copyWithBasicParams(quantita = nuovaQ))
                     }
                 )
             }

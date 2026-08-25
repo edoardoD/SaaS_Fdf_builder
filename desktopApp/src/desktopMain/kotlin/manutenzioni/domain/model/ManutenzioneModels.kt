@@ -1,26 +1,234 @@
 package manutenzioni.domain.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Impianto(
+sealed class Impianto {
+    abstract val id: String
+    abstract val codIntervento: String // Esempio: "GE", "CAB"
+    abstract val nomeCompleto: String  // Esempio: "Gruppo Elettrogeno"
+    abstract val premessa: String?     // Testo descrittivo sulla sicurezza
+    abstract val listaAttivita: List<Attivita>
+    abstract val listaNormative: List<Normativa>
+    abstract val cantiereId: String?
+    abstract val quantita: Int
+    abstract val noteSpecifiche: String?
+
+    // Metodo helper per creare una copia con parametri comuni, utile per il ViewModel/Editor
+    abstract fun copyWithBasicParams(
+        id: String = this.id,
+        codIntervento: String = this.codIntervento,
+        nomeCompleto: String = this.nomeCompleto,
+        premessa: String? = this.premessa,
+        listaAttivita: List<Attivita> = this.listaAttivita,
+        listaNormative: List<Normativa> = this.listaNormative,
+        cantiereId: String? = this.cantiereId,
+        quantita: Int = this.quantita,
+        noteSpecifiche: String? = this.noteSpecifiche
+    ): Impianto
+}
+
+@Serializable
+@SerialName("ImpiantoStandard")
+data class ImpiantoStandard(
+    override val id: String = java.util.UUID.randomUUID().toString(),
+    override val codIntervento: String,
+    override val nomeCompleto: String,
+    override val premessa: String? = null,
+    override val listaAttivita: List<Attivita> = emptyList(),
+    override val listaNormative: List<Normativa> = emptyList(),
+    override val cantiereId: String? = null,
+    override val quantita: Int = 1,
+    override val noteSpecifiche: String? = null
+) : Impianto() {
+    override fun copyWithBasicParams(
+        id: String, codIntervento: String, nomeCompleto: String, premessa: String?, 
+        listaAttivita: List<Attivita>, listaNormative: List<Normativa>, 
+        cantiereId: String?, quantita: Int, noteSpecifiche: String?
+    ): Impianto = copy(
+        id = id, codIntervento = codIntervento, nomeCompleto = nomeCompleto, 
+        premessa = premessa, listaAttivita = listaAttivita, listaNormative = listaNormative, 
+        cantiereId = cantiereId, quantita = quantita, noteSpecifiche = noteSpecifiche
+    )
+}
+
+@Serializable
+@SerialName("QuadroBT")
+data class QuadroBT(
+    override val id: String = java.util.UUID.randomUUID().toString(),
+    override val codIntervento: String,
+    override val nomeCompleto: String,
+    override val premessa: String? = null,
+    override val listaAttivita: List<Attivita> = emptyList(),
+    override val listaNormative: List<Normativa> = emptyList(),
+    override val cantiereId: String? = null,
+    override val quantita: Int = 1,
+    override val noteSpecifiche: String? = null,
+    
+    val ubicazione: String = "",
+    val listaInterruttori: List<InterruttoreBT> = emptyList()
+) : Impianto() {
+    override fun copyWithBasicParams(
+        id: String, codIntervento: String, nomeCompleto: String, premessa: String?, 
+        listaAttivita: List<Attivita>, listaNormative: List<Normativa>, 
+        cantiereId: String?, quantita: Int, noteSpecifiche: String?
+    ): Impianto = copy(
+        id = id, codIntervento = codIntervento, nomeCompleto = nomeCompleto, 
+        premessa = premessa, listaAttivita = listaAttivita, listaNormative = listaNormative, 
+        cantiereId = cantiereId, quantita = quantita, noteSpecifiche = noteSpecifiche
+    )
+}
+
+@Serializable
+@SerialName("ImpiantoEmergenza")
+data class ImpiantoEmergenza(
+    override val id: String = java.util.UUID.randomUUID().toString(),
+    override val codIntervento: String,
+    override val nomeCompleto: String,
+    override val premessa: String? = null,
+    override val listaAttivita: List<Attivita> = emptyList(),
+    override val listaNormative: List<Normativa> = emptyList(),
+    override val cantiereId: String? = null,
+    override val quantita: Int = 1,
+    override val noteSpecifiche: String? = null,
+    
+    val listaLampade: List<LampadaEmergenza> = emptyList()
+) : Impianto() {
+    override fun copyWithBasicParams(
+        id: String, codIntervento: String, nomeCompleto: String, premessa: String?, 
+        listaAttivita: List<Attivita>, listaNormative: List<Normativa>, 
+        cantiereId: String?, quantita: Int, noteSpecifiche: String?
+    ): Impianto = copy(
+        id = id, codIntervento = codIntervento, nomeCompleto = nomeCompleto, 
+        premessa = premessa, listaAttivita = listaAttivita, listaNormative = listaNormative, 
+        cantiereId = cantiereId, quantita = quantita, noteSpecifiche = noteSpecifiche
+    )
+}
+
+@Serializable
+@SerialName("RilevazioneAntincendio")
+data class RilevazioneAntincendio(
+    override val id: String = java.util.UUID.randomUUID().toString(),
+    override val codIntervento: String,
+    override val nomeCompleto: String,
+    override val premessa: String? = null,
+    override val listaAttivita: List<Attivita> = emptyList(),
+    override val listaNormative: List<Normativa> = emptyList(),
+    override val cantiereId: String? = null,
+    override val quantita: Int = 1,
+    override val noteSpecifiche: String? = null,
+    
+    val quantitaComponenti: Map<String, Int> = emptyMap()
+) : Impianto() {
+    override fun copyWithBasicParams(
+        id: String, codIntervento: String, nomeCompleto: String, premessa: String?, 
+        listaAttivita: List<Attivita>, listaNormative: List<Normativa>, 
+        cantiereId: String?, quantita: Int, noteSpecifiche: String?
+    ): Impianto = copy(
+        id = id, codIntervento = codIntervento, nomeCompleto = nomeCompleto, 
+        premessa = premessa, listaAttivita = listaAttivita, listaNormative = listaNormative, 
+        cantiereId = cantiereId, quantita = quantita, noteSpecifiche = noteSpecifiche
+    )
+}
+
+@Serializable
+@SerialName("RilevazioneGas")
+data class RilevazioneGas(
+    override val id: String = java.util.UUID.randomUUID().toString(),
+    override val codIntervento: String,
+    override val nomeCompleto: String,
+    override val premessa: String? = null,
+    override val listaAttivita: List<Attivita> = emptyList(),
+    override val listaNormative: List<Normativa> = emptyList(),
+    override val cantiereId: String? = null,
+    override val quantita: Int = 1,
+    override val noteSpecifiche: String? = null,
+    
+    val quantitaComponenti: Map<String, Int> = emptyMap()
+) : Impianto() {
+    override fun copyWithBasicParams(
+        id: String, codIntervento: String, nomeCompleto: String, premessa: String?, 
+        listaAttivita: List<Attivita>, listaNormative: List<Normativa>, 
+        cantiereId: String?, quantita: Int, noteSpecifiche: String?
+    ): Impianto = copy(
+        id = id, codIntervento = codIntervento, nomeCompleto = nomeCompleto, 
+        premessa = premessa, listaAttivita = listaAttivita, listaNormative = listaNormative, 
+        cantiereId = cantiereId, quantita = quantita, noteSpecifiche = noteSpecifiche
+    )
+}
+
+@Serializable
+@SerialName("QuadroMQT")
+data class QuadroMQT(
+    override val id: String = java.util.UUID.randomUUID().toString(),
+    override val codIntervento: String,
+    override val nomeCompleto: String,
+    override val premessa: String? = null,
+    override val listaAttivita: List<Attivita> = emptyList(),
+    override val listaNormative: List<Normativa> = emptyList(),
+    override val cantiereId: String? = null,
+    override val quantita: Int = 1,
+    override val noteSpecifiche: String? = null,
+    
+    val tipoInterruttore: MqtSwitchType? = null
+) : Impianto() {
+    override fun copyWithBasicParams(
+        id: String, codIntervento: String, nomeCompleto: String, premessa: String?, 
+        listaAttivita: List<Attivita>, listaNormative: List<Normativa>, 
+        cantiereId: String?, quantita: Int, noteSpecifiche: String?
+    ): Impianto = copy(
+        id = id, codIntervento = codIntervento, nomeCompleto = nomeCompleto, 
+        premessa = premessa, listaAttivita = listaAttivita, listaNormative = listaNormative, 
+        cantiereId = cantiereId, quantita = quantita, noteSpecifiche = noteSpecifiche
+    )
+}
+
+@Serializable
+enum class MqtSwitchType(val label: String) {
+    SF6("SF6"),
+    VUOTO("Vuoto"),
+    ARIA("Aria")
+}
+
+@Serializable
+data class InterruttoreBT(
     val id: String = java.util.UUID.randomUUID().toString(),
-    val codIntervento: String, // Esempio: "GE", "CAB"
-    val nomeCompleto: String,  // Esempio: "Gruppo Elettrogeno"
-    val premessa: String?,     // Testo descrittivo sulla sicurezza
-    val listaAttivita: List<Attivita>,
-    val listaNormative: List<Normativa> = emptyList(),
-    val cantiereId: String? = null,
-    val quantita: Int = 1,
-    val noteSpecifiche: String? = null
+    val nome: String,
+    val note: String? = null
 )
+
+@Serializable
+data class LampadaEmergenza(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val modello: String,
+    val autonomia: String // es. "1h", "3h"
+)
+
+@Serializable
+data class ComponenteStandard(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val tipo: TipoComponenteStandard,
+    val nome: String,
+    val attributi: Map<String, String> = emptyMap() // Per es. autonomia lampade
+)
+
+@Serializable
+enum class TipoComponenteStandard {
+    INTERRUTTORE_BT,
+    LAMPADA_EMERGENZA,
+    COMPONENTE_ANTINCENDIO,
+    COMPONENTE_GAS
+}
 
 @Serializable
 data class Attivita(
     val nAttivita: Int,
     val tipoAttivita: String?,
     val descrizione: String?,
-    val frequenza: Periodo // Ordinamento basato su questo oggetto
+    val frequenza: Periodo, // Ordinamento basato su questo oggetto
+    val visibile: Boolean = true, // Per gestire la visibilità condizionale (es. attività custom Antincendio)
+    val componentRef: String? = null // ID del componente che attiva questa attività
 )
 
 @Serializable

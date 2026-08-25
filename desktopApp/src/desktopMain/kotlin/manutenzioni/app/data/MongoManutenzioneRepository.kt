@@ -51,7 +51,7 @@ class MongoManutenzioneRepository(
             if (imp.cantiereId == null) {
                 hasGlobal = true
             }
-            val updated = impiantoTemplate.copy(
+            val updated = impiantoTemplate.copyWithBasicParams(
                 id = imp.id, 
                 cantiereId = imp.cantiereId, 
                 quantita = imp.quantita, 
@@ -60,7 +60,7 @@ class MongoManutenzioneRepository(
             salvaImpianto(updated)
         }
         if (!hasGlobal) {
-            salvaImpianto(impiantoTemplate.copy(cantiereId = null))
+            salvaImpianto(impiantoTemplate.copyWithBasicParams(cantiereId = null))
         }
     }
 

@@ -161,7 +161,7 @@ class JsonManutenzioneRepository(
                 if (list[i].cantiereId == null) {
                     hasGlobal = true
                 }
-                list[i] = list[i].copy(
+                list[i] = list[i].copyWithBasicParams(
                     nomeCompleto = impiantoTemplate.nomeCompleto,
                     premessa = impiantoTemplate.premessa,
                     listaAttivita = impiantoTemplate.listaAttivita,
@@ -171,7 +171,7 @@ class JsonManutenzioneRepository(
             }
         }
         if (!hasGlobal) {
-            list.add(impiantoTemplate.copy(cantiereId = null))
+            list.add(impiantoTemplate.copyWithBasicParams(cantiereId = null))
         }
         saveToDisk(list, getClientiCache(), getCantieriCache())
     }

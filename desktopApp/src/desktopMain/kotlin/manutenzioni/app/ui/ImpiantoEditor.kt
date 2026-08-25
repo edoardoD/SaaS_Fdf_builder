@@ -94,7 +94,7 @@ fun ImpiantoEditor(
                         nomeCompletoError = nomeCompleto.isBlank()
     
                         if (!codInterventoError && !nomeCompletoError) {
-                            val updated = impianto.copy(
+                            val updated = impianto.copyWithBasicParams(
                                 codIntervento = codIntervento.trim(),
                                 nomeCompleto = nomeCompleto.trim(),
                                 premessa = premessa.ifBlank { null },
