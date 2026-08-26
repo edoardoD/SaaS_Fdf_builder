@@ -52,11 +52,11 @@ fun ImpiantoSelectionList(
                             .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val isSelected = selectionState[impianto.codIntervento] == true
+                        val isSelected = selectionState[impianto.id] == true
                         Checkbox(
                             checked = isSelected,
                             onCheckedChange = { checked ->
-                                onSelectionChanged(impianto.codIntervento, checked)
+                                onSelectionChanged(impianto.id, checked)
                             }
                         )
                         

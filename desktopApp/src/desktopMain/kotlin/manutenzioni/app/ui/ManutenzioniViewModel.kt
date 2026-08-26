@@ -556,10 +556,7 @@ class ManutenzioniViewModel(
                 _uiState.update { state ->
                     val isCurrent = state.selectedImpianto?.id == id
                     val updatedSelection = state.impiantiSelezionati.toMutableMap()
-                    
-                    if (codIntervento != null) {
-                        updatedSelection.remove(codIntervento)
-                    }
+                    updatedSelection.remove(id)
 
                     state.copy(
                         impianti = impiantiAggiornati,
