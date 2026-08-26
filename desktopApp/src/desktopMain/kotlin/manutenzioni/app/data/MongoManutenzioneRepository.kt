@@ -21,6 +21,7 @@ class MongoManutenzioneRepository(
     private val impiantiCollection = database.getCollection<Impianto>("impianti")
     private val clientiCollection = database.getCollection<Cliente>("clienti")
     private val cantieriCollection = database.getCollection<Cantiere>("cantieri")
+    private val componentiCollection = database.getCollection<manutenzioni.domain.model.ComponenteStandard>("componenti")
 
     override suspend fun salvaImpianto(impianto: Impianto) {
         // Upsert by id
@@ -119,5 +120,18 @@ class MongoManutenzioneRepository(
     override suspend fun eliminaCantiere(id: String) {
         impiantiCollection.deleteMany(eq("cantiereId", id))
         cantieriCollection.deleteOne(eq("id", id))
+    }
+    
+    // --- Anagrafica Componenti ---
+    override suspend fun caricaComponentiStandard(): List<manutenzioni.domain.model.ComponenteStandard> {
+        return componentiCollection.find().toList()
+    }
+
+    override suspend fun salvaComponenteStandard(componente: manutenzioni.domain.model.ComponenteStandard) {
+        componentiCollection.replaceOne(
+            filter = eq("id", componente.id),
+            replacement = componente,
+            options = ReplaceOptions().upsert(true)
+        )
     }
 }

@@ -66,7 +66,8 @@ data class QuadroBT(
     override val quantita: Int = 1,
     override val noteSpecifiche: String? = null,
     
-    val ubicazione: String = "",
+    val sigla: String = "",
+    val descrizioneQuadro: String = "",
     val listaInterruttori: List<InterruttoreBT> = emptyList()
 ) : Impianto() {
     override fun copyWithBasicParams(

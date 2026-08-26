@@ -80,7 +80,8 @@ fun AdminDashboardScreen(
                 AdminTab.IMPIANTI_GLOBALI -> {
                     AdminImpiantiGlobaliTab(
                         impiantiGlobali = state.impiantiGlobali,
-                        onUpdateGlobale = { viewModel.updateImpiantoGlobale(it) }
+                        componentiStandard = state.componentiStandard,
+                        onUpdateGlobale = viewModel::updateImpiantoGlobale
                     )
                 }
             }

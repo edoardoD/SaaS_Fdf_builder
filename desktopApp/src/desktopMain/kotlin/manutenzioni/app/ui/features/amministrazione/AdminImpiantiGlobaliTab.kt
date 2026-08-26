@@ -22,6 +22,7 @@ import manutenzioni.app.ui.theme.SlateBorder
 @Composable
 fun AdminImpiantiGlobaliTab(
     impiantiGlobali: List<Impianto>,
+    componentiStandard: List<manutenzioni.domain.model.ComponenteStandard>,
     onUpdateGlobale: (Impianto) -> Unit
 ) {
     var impiantoInModifica by remember { mutableStateOf<Impianto?>(null) }
@@ -31,6 +32,7 @@ fun AdminImpiantiGlobaliTab(
         Card(elevation = 8.dp, shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxSize()) {
             ImpiantoEditor(
                 impianto = impiantoInModifica!!,
+                componentiStandard = componentiStandard,
                 isReadOnlyAdminFields = false, // Permette di modificare Codice e Nome!
                 onSave = { impianto, _ ->
                     onUpdateGlobale(impianto)

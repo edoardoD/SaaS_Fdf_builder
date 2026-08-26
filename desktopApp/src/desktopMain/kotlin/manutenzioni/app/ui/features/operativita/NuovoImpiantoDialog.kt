@@ -14,7 +14,8 @@ import manutenzioni.domain.model.Impianto
 fun NuovoImpiantoDialog(
     impiantiGlobali: List<Impianto>,
     onDismiss: () -> Unit,
-    onConfirm: (Impianto?, Int) -> Unit
+    onConfirm: (Impianto?, Int) -> Unit,
+    onMassiveQuadroRequested: (Impianto) -> Unit = {}
 ) {
     var step by remember { mutableStateOf(1) }
     var selectedTemplate by remember { mutableStateOf<Impianto?>(null) }
@@ -43,8 +44,13 @@ fun NuovoImpiantoDialog(
                                 ) {
                                     Button(
                                         onClick = { 
-                                            selectedTemplate = template
-                                            step = 2 
+                                            if (template is manutenzioni.domain.model.QuadroBT || template.codIntervento == "Q") {
+                                                onMassiveQuadroRequested(template)
+                                                onDismiss()
+                                            } else {
+                                                selectedTemplate = template
+                                                step = 2 
+                                            }
                                         },
                                         modifier = Modifier.fillMaxWidth(),
                                         colors = ButtonDefaults.outlinedButtonColors()

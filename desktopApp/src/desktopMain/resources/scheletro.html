@@ -38,6 +38,20 @@
             width: 100%;
             table-layout: fixed;
             /* Impedisce overflow colonne */
+            page-break-inside: auto;
+        }
+        
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-footer-group;
         }
 
         td {
@@ -309,7 +323,7 @@
                 <col class="col--w12" />
             </colgroup>
 
-            <tbody>
+            <thead>
                 <!-- ========== SEZIONE 1: INTESTAZIONE ========== -->
                 <tr class="row--title">
                     <td colspan="11" class="cell--title">
@@ -453,9 +467,13 @@
                     <td class="cell--data-standard"></td>
                     <td class="cell--spacer"></td>
                 </tr>
-
+            </thead>
+            
+            <tbody>
                 <!-- ========== SEZIONE 6: RIGHE DATI (generate dinamicamente) ========== --><!-- ATTIVITA_ROWS -->
-
+            </tbody>
+            
+            <tfoot>
                 <!-- ========== SEZIONE 7: LEGENDA ========== -->
                 <tr class="row--legend">
                     <td colspan="11" class="cell--legend">
@@ -490,7 +508,7 @@
                 <tr class="row--standard">
                     <td class="cell--spacer"></td>
                 </tr>
-            </tbody>
+            </tfoot>
         </table>
     </form>
 
