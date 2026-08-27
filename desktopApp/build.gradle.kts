@@ -53,6 +53,13 @@ kotlin {
                 implementation("org.openjfx:javafx-graphics:21.0.2:$javafxPlatform")
             }
         }
+
+        val desktopTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+            }
+        }
     }
 }
 

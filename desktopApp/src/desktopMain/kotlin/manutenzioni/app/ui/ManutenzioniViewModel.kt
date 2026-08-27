@@ -467,11 +467,11 @@ class ManutenzioniViewModel(
      * Crea un nuovo impianto vuoto, lo seleziona e apre l'editor.
      * Se è passato un template, lo persiste direttamente per il cantiere.
      */
-    fun createNewImpianto(template: Impianto? = null, quantita: Int = 1) {
+    fun createNewImpianto(template: Impianto? = null) {
         val newImpianto = template?.copyWithBasicParams(
             id = java.util.UUID.randomUUID().toString(),
             cantiereId = _uiState.value.selectedCantiere?.id,
-            quantita = quantita
+            quantita = 1
         ) ?: manutenzioni.domain.model.ImpiantoStandard(
             id = java.util.UUID.randomUUID().toString(),
             codIntervento = "",
@@ -479,7 +479,7 @@ class ManutenzioniViewModel(
             premessa = null,
             listaAttivita = emptyList(),
             cantiereId = _uiState.value.selectedCantiere?.id,
-            quantita = quantita
+            quantita = 1
         )
         if (template != null) {
             saveImpianto(newImpianto)

@@ -40,7 +40,10 @@ fun ImpiantoSelectionList(
             modifier = Modifier.padding(bottom = 16.dp)
         )
         
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             items(impianti, key = { it.id }) { impianto ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),

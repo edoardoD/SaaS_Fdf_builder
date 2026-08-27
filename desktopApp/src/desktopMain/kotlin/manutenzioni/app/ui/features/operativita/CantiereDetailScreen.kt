@@ -2,7 +2,9 @@ package manutenzioni.app.ui.features.operativita
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -31,7 +33,7 @@ fun CantiereDetailScreen(
     onFrequenzaPerImpiantoSelected: (String, Periodo) -> Unit,
     onGeneraPdf: () -> Unit,
     onOpenPdf: () -> Unit,
-    onCreateNewImpianto: (Impianto?, Int) -> Unit,
+    onCreateNewImpianto: (Impianto?) -> Unit,
     onDeleteImpianto: (String) -> Unit
 ) {
     // Gestione visualizzazione ImpiantoEditor
@@ -66,8 +68,8 @@ fun CantiereDetailScreen(
         NuovoImpiantoDialog(
             impiantiGlobali = state.impiantiGlobali,
             onDismiss = { showNuovoImpiantoDialog = false },
-            onConfirm = { template, quantita ->
-                onCreateNewImpianto(template, quantita)
+            onConfirm = { template ->
+                onCreateNewImpianto(template)
                 showNuovoImpiantoDialog = false
             },
             onMassiveQuadroRequested = { template ->
@@ -183,13 +185,14 @@ fun CantiereDetailScreen(
                     },
                     onQuantitaChanged = { impianto, nuovaQ ->
                         onSaveImpianto(impianto.copyWithBasicParams(quantita = nuovaQ))
-                    }
+                    },
+                    modifier = Modifier.weight(1f).fillMaxWidth()
                 )
             }
 
             // Colonna 2: Frequenza e Generazione
             Column(
-                modifier = Modifier.weight(1f).fillMaxHeight(),
+                modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 Card(
