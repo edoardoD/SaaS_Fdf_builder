@@ -22,7 +22,6 @@ fun ImpiantoSelectionList(
     onSelectionChanged: (String, Boolean) -> Unit,
     onEditImpianto: (Impianto) -> Unit,
     onDeleteImpianto: (Impianto) -> Unit,
-    onQuantitaChanged: (Impianto, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (impianti.isEmpty()) {

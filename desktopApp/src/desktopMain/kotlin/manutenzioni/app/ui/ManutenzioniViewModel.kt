@@ -408,7 +408,7 @@ class ManutenzioniViewModel(
                             impianto = impianto,
                             frequenza = state.frequenzePerImpianto[impianto.id] ?: Periodo(manutenzioni.domain.model.TipoPeriodo.A, 1),
                             outputDir = outputDir,
-                            copies = impianto.quantita,
+                            copies = 1,
                             clienteNome = state.selectedCliente?.nome,
                             onProgress = { current, total ->
                                 _uiState.update {

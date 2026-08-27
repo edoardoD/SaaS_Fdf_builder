@@ -183,9 +183,6 @@ fun CantiereDetailScreen(
                         impiantoInEliminazione = impianto
                         showDeleteImpiantoDialog = true
                     },
-                    onQuantitaChanged = { impianto, nuovaQ ->
-                        onSaveImpianto(impianto.copyWithBasicParams(quantita = nuovaQ))
-                    },
                     modifier = Modifier.weight(1f).fillMaxWidth()
                 )
             }

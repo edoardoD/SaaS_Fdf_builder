@@ -43,7 +43,6 @@ fun ImpiantoEditor(componentiStandard: List<manutenzioni.domain.model.Componente
     var codIntervento by remember(impianto) { mutableStateOf(impianto.codIntervento) }
     var nomeCompleto by remember(impianto) { mutableStateOf(impianto.nomeCompleto) }
     var premessa by remember(impianto) { mutableStateOf(impianto.premessa ?: "") }
-    var quantita by remember(impianto) { mutableStateOf(impianto.quantita.toString()) }
     var noteSpecifiche by remember(impianto) { mutableStateOf(impianto.noteSpecifiche ?: "") }
     var attivitaList by remember(impianto) { mutableStateOf(impianto.listaAttivita) }
     
@@ -103,7 +102,7 @@ fun ImpiantoEditor(componentiStandard: List<manutenzioni.domain.model.Componente
                                 codIntervento = codIntervento.trim(),
                                 nomeCompleto = nomeCompleto.trim(),
                                 premessa = premessa.ifBlank { null },
-                                quantita = quantita.toIntOrNull() ?: 1,
+                                quantita = 1,
                                 noteSpecifiche = noteSpecifiche.ifBlank { null },
                                 listaAttivita = attivitaList
                             )
