@@ -1,0 +1,50 @@
+Gruppo di continuità;;;;
+Periodicità;Progressivo;Attività;Zona;Attività
+01;1;Verifica;UPS;Verifica dei dispositivi di sicurezza posti sull’apparecchiatura, di segnalazioni, allarmi e qualsiasi anomalia segnalata
+01;2;Controllo;UPS;Controllo generale a vista sull'integrità esteriore, stato di conservazione, presenza di danneggiamenti esterni, fenomeni di ossidazione, logorio, eccessivo rumore, vibrazioni
+01;3;Controllo;UPS;Controllo visivo di tutte le componenti meccaniche, elettriche (cablaggi, commutatori, fusibili, interruttori, spie, ecc.) ed elettroniche (schede, raddrizzatori, condensatori, ecc.)
+02;4;Verifica;UPS;Misurazione della temperatura del locale di installazione UPS/SOCCORRITORE
+02;5;Prova;UPS;Esecuzione del test automatico di commutazione (se disponibile)
+02;6;Controllo;UPS;Controllo funzionamento ventola di raffreddamento, effettivo ricircolo aria di raffreddameno ed eventuale pulizia dei componenti (ventilatori, filtri, ecc.)
+04;7;Controllo;UPS;Controllo funzionamento ventola di raffreddamento, effettivo ricircolo aria di raffreddameno ed eventuale pulizia dei componenti (ventilatori, filtri, ecc.)
+04;8;Prova;UPS;Simulazione di Black-Out. Togliere tensione all’UPS aprendo l’interruttore corrispondente sul quadro di alimentazione. Verificare il tempo e idoneità della procedura di avvio (rete/inverter)
+04;9;Prova;UPS;Simulazione di Ritorno Energia. Dare tensione all’UPS chiudendo il suddettointerruttore. Verificare il tempo e idoneità della procedura di ritorno in fase di carica da rete (rete/inverter)
+06;10;Prova;UPS;Verifica del corretto funzionamento dei dispositivi di Bypass manuale
+06;11;Prova;UPS;Verifica del funzionamento della comunicazione verso l'esterno di anomalie, guasti, interventi
+06;12;Prova;UPS;Verifica del funzionamento della connessione hardware con la rete dati, e del corretto funzionamento di software di verifica e gestione esterni (se presenti)
+1;13;Prova;UPS;Prova AUTONOMIA con simulazione di mancanza alimentazione per almeno 5 minuti, ed alla fine della prova registrare la percentuale di carica rimanente e l'assorbimento del carico
+1;14;Manut.;UPS;Effettuare una pulizia generale di tutti i componenti interni
+1;15;Prova;UPS;Prova di funzionamento del dispositivo di sgancio di emergenza EPO (se presente)
+NP;16;;;
+NP;17;;;
+NP;18;;;
+NP;19;;;
+NP;20;;;
+NP;21;;;
+NP;22;;;
+NP;23;;;
+NP;24;;;
+NP;25;;;
+NP;26;;;
+NP;27;;;
+NP;28;;;
+NP;29;;;
+NP;30;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+Premessa UPS;;;;
+Il controllo periodico deve essere effettuato da tecnico qualificato. Prima di passare alla fase esecutiva delle prove, occorre controllare che gli effetti delle prove (black-out simulato) non producano situazioni di pericolo per le persone o di danno per l'attività, pianificando ed organizzando le prove, con i responsabili dell'attività.;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;

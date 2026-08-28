@@ -1,0 +1,50 @@
+Rilevazione incendi;;;;
+Periodicitˆ;Progressivo;Attivitˆ;Zona;Attivitˆ
+01;1;Controllo;Centrale;Nel caso di modifiche all'impianto, controllare il firmware della centrale e dei teminali remoti ove presenti
+01;2;Controllo;Centrale;Verifica degli eventi registrati nella centrale. Verifica che non siano presenti allarmi.
+01;3;Controllo;Centrale;Verifica dell'efficienza, commutazione delle alimentazioni, segnalazioni, rimozione alimentazione primaria.
+02;4;Controllo;Centrale;Stato delle batterie, efficienza di lampade, led e segnalazioni ottiche e digitali
+02;5;Controllo;Centrale;Prova di funzionamento delle segnalazioni ottice ed acustiche locali, verifica della capacitˆ di ricevere gli allarmi provenienti dai dispositivi automatici e manuali
+02;6;Verifica;Centrale;Esecuzione del test automatico dell'impianto da parte della centrale
+04;7;Controllo;Componenti;Controllo generale a vista sull'integritˆ esteriore, stato di conservazione e stabilitˆ dei vari componenti dell'impianto
+04;8;Verifica;Sistema;Verifica di efficienza del sistema di visualizzazione grafica e possibilitˆ di inviare e ricevere comandi
+04;9;Verifica;Sitema;Verifica di efficienza dei segnali di rinvio degli stati di allarme e guasto sui ripetitori, modem, combinatori
+06;10;Controllo;Linee;Verifica segnalazione guasto su apertura o corto circuito delle linee di rivelazione e di comando sovegliate
+NP;11;;;#N/A
+NP;12;;;#N/A
+NP;13;;;#N/A
+NP;14;;;#N/A
+NP;15;;;#N/A
+NP;16;;;#N/A
+NP;17;;;#N/A
+NP;18;;;#N/A
+NP;19;;;#N/A
+NP;20;;;#N/A
+NP;21;;;#N/A
+NP;22;;;#N/A
+NP;23;;;#N/A
+NP;24;;;#N/A
+NP;25;;;#N/A
+NP;26;;;#N/A
+NP;27;;;#N/A
+NP;28;;;#N/A
+NP;29;;;#N/A
+NP;30;;;#N/A
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+Premessa Impianto rilevazione incendi;;;;
+Il controllo periodico deve essere effettuato da tecnico qualificato. Prima di passare alla fase esecutiva delle prove, occorre controllare la presenza dei documenti riguardanti il controllo iniziale. Durante le operazioni di controllo periodico, deve essere eseguito un controllo funzionale sul sistema, e sul 50% di tutti i dispositivi e azionamenti presenti nel sistema, essendo le verifiche semestrali, raggiungendo il 100% dei dispositivi nell'arco dei 12 mesi. Prima di procedere con le prove della parte di rivelazione degli impianti di rivelazione e spegnimento, porre le apparecchiature di comando dello spegnimento autotatico in sicurezza, per evitare l'attivazione dello spegnimento a causa delle operazioni di controllo. In modo particolare assicurarsi che gli effetti delle prove (segnalazioni e comandi) non producano situazioni di pericolo o attuazioni indesiderate, pianificando ed organizzando le prove, ed i metodi di prova, con il responsabile della sicurezza e/o con il responsabile del servizio prevenzione e protezione competente.;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;

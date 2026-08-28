@@ -1,0 +1,50 @@
+Cabina MT/BT;;;;
+Periodicità;Progressivo;Attività;Zona;Attività
+1;1;Controllo;Cabina Esterna;Controllo generale, della struttura esterna della cabina, integrità parti strutturali, stato del pavimento/terreno esterno perimetrale, stato di conservazione del manto di copertura
+1;2;Controllo;Cabina Esterna;Controllo integrità esterna del tetto, dei muri, degli intonaci, del pavimento, e ricerca di eventuali infiltrazioni di acqua
+1;3;Controllo;Cabina Interna;Controllo integrità delle pareti interne, degli intonaci, del pavimento, del soffitto, e ricerca di eventuali infiltrazioni di acqua
+1;4;Controllo;Cabina Interna;Verifica delle barriere, strutture di separazione, reti di protezione, e relativi sistemi di chiusura per impedire il contatto diretto con le parti in tensione
+1;5;Controllo;Cabina Interna;Verifica funzionalità degli infissi (porte, finestre, botole, cunicoli, ecc.), della efficacia dei sistemi di chiusura, e della integrità contro le penetrazioni, cedimenti, e ossidazioni
+1;6;Verifica;Cabina Interna;Verifica accessibilità alla cabina, per le persone e per eventuali mezzi per il trasporto delle apparecchiature da e verso l'interno della cabina
+1;7;Controllo;Cabina Interna;Controllo della efficacia dei sistemi di areazione naturale e meccanica
+1;8;Verifica;Cabina Interna;Verifica funzionalità, integrità termostato, funzionamento ventilatore ed efficacia/stato eventuali filtri
+1;9;Verifica;Cabina;Verifica integrità, funzionalità e completezza delle chiusure di cunicoli/cavedi interni ed esterni
+1;10;Controllo;Cabina Interna;Controllo temperatura ed umidità interne
+1;11;Controllo;Cabina Interna;Controllo fissaggio, leggibilità e completezza dei cartelli di avvertimento interni ed esterni
+1;12;Controllo;Cabina Interna;Controllo fissaggio, leggibilità, completezza e data ultimo aggiornamento schema elettrico
+1;13;Verifica;Cabina Interna;Verifica presenza ed intergrità dei dispositivi di comando (leve di manovra, chiavi, ecc.) e protezione (guanti isolanti, pedana/tappeto isolante se necessari)
+1;14;Controllo;Cabina;Controllo efficienza serrature, chiavi, lucchetti, dispositivi di apertura porte
+1;15;Controllo;Cabina;Controllo efficienza impianto di illuminazione ordinaria, illuminazione di sicurezza, eventuali torce, prese di servizio
+1;16;Controllo;Cabina;Controllo larghezza passaggi tra le apparecchiature, vie di fuga e di soccorso, uscite di emergenza, e funzionamento eventuali maniglioni antipanico
+1;17;Controllo;Cabina;Controllo visibilità segnaletica di esodo cabina, ed indicazione dei luoghi di soccorso più vicini
+1;18;Verifica;Cabina;Verifica efficacia misure di protezione contro i contatti diretti, e di protezione contro l'avvicinamento a parti attive, distanze, barriere, schermi, ecc.
+1;19;Verifica;Cabina;Verifica efficacia della protezione tramite apparecchiature con involucro metallico
+1;20;Controllo;Cabina;Controllo del collegamento di messa a terra tramite i conduttori di protezione al collettore generale di cabina, e verifica del corretto serraggio
+1;21;Controllo;Cabina;Controllo carica degli estintori e data di scadenza
+1;22;Manutenzione;Cabina Interna;Pulizia generale all'interno della cabina
+1;23;Manutenzione;Cabina Esterna;Pulizia generale all'esterno in prossimità della cabina
+2;24;Prova;Cabina;Verifica del sistema di illuminazione di emergenza e sicurezza tramite scarica e ricarica accumulatori con indicazione del tempo di autonomia minimo garantito
+2;25;Prova;Cabina;Verifica del sistema di alimentazione di soccorso ausiliari (UPS-Soccorritore) tramite scarica e ricarica accumulatori con indicazione del tempo di autonomia minimo garantito
+2;26;Prova;Cabina;Misura della resistenza dei collegamenti equipotenziali su tutte le parti metalliche interne
+2;27;Prova;Cabina;Misura della resistenza di terra globale della cabina tramite metodo voltamperometrico
+2;28;Prova;Cabina;Prova di funzionamento dei sistemi di sgancio bt ed MT
+2;29;Prova;Cabina Interna;Verifica della presenza ed integrità delle barriere tagliafiamma (se presenti)
+2;30;Prova;Cabina Interna;Verifica della presenza ed integrità delle soglie raccolta liquidi, della impermeabilità e dello stato di pulizia (se presenti)
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+Premessa Cabine;;;;
+Le attività sulla cabina elettrica devono essere svolte da personale addestrato ai lavori elettrici con qualifca PES come da Norma CEI 11-27, ed eseguiti in totale sicurezza. Prima di accedere ai locali è fondamentale avvertire i referenti del sito, ed avvertire il responsabile sulle attività che ci si appresta a svolgere. Nel caso l'alimentazione alla cabina provenga dall'ente distributore, occorre applicare tutte le precauzioni per la sicurezza delle persone e nel caso si rilevino problemi ai manufatti in uso all'ente distributore, avvisare tempestivamente il suddetto ente. Prima di procedere alle prove e misure che possano mettere fuori tensione la cabina, concordare con i referenti del sito la possibilità e le modalità in cui svolgere queste attività.;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
