@@ -229,7 +229,8 @@ data class Attivita(
     val descrizione: String?,
     val frequenza: Periodo, // Ordinamento basato su questo oggetto
     val visibile: Boolean = true, // Per gestire la visibilità condizionale (es. attività custom Antincendio)
-    val componentRef: String? = null // ID del componente che attiva questa attività
+    val componentRef: String? = null, // ID del componente che attiva questa attività
+    val targetImpiantoCod: String? = null // Codice impianto bersaglio per discovery cross-plant (es. "GE", "PEM")
 )
 
 @Serializable

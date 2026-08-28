@@ -410,6 +410,7 @@ class ManutenzioniViewModel(
                             outputDir = outputDir,
                             copies = 1,
                             clienteNome = state.selectedCliente?.nome,
+                            contextImpianti = state.impiantiDelCantiere,
                             onProgress = { current, total ->
                                 _uiState.update {
                                     it.copy(
