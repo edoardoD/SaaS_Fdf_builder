@@ -1,0 +1,28 @@
+;;;
+;;;
+QG 06;Quadro Generale;Q;06
+QGA 06;Quadro Generale Ampliamento;Q;06
+QGNA 06;Quadro Generale Nuovo Ampliamento;Q;06
+QCT 06;Quadro Centrale Termica;Q;06
+QSC2 06;Quadro Sotto Centrale 2;Q;06
+QLAB 06;Quadro Laboratorio;Q;06
+QLAB2 06;Quadro Laboratorio 2;Q;06
+QCUC 06;Quadro Cucina;Q;06
+QAUX 06;Quadri AUX;Q;06
+QC 1;Quadro Contatore;Q;1
+QG 1;Quadro Generale;Q;1
+QGA 1;Quadro Generale Ampliamento;Q;1
+QGNA 1;Quadro Generale Nuovo Ampliamento;Q;1
+QCT 1;Quadro Centrale Termica;Q;1
+QSC2 1;Quadro Sotto Centrale 2;Q;1
+QLAB 1;Quadro Laboratorio;Q;1
+QLAB2 1;Quadro Laboratorio 2;Q;1
+QCUC 1;Quadro Cucina;Q;1
+QAUX 1;Quadri AUX;Q;1
+PEM 06;Pulsante Sgancio Generale di Emergenza;PEM;06
+PEM 1;Pulsante Sgancio Generale di Emergenza;PEM;1
+EM 06;Illuminazione d'emergenza;EM;06
+SPD 06;Limitatori di sovratensione;SPD;06
+IE 1;Impianto elettrico e di terra;IE;1
+IE 2;Impianto elettrico e di terra;IE;2
+IE 3;Impianto elettrico e di terra;IE;3

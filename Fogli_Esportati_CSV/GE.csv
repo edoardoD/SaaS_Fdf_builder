@@ -1,0 +1,50 @@
+Gruppo elettrogeno;;;;
+Periodicità;Progressivo;Attività;Zona;Attività
+01;1;Controllo;Gruppo Elettrogeno;Controllo livello combustibile nel serbatoio di deposito e nel serbatoio di servizio, controllo funzionalità galleggiante del serbatoio di servizio
+01;2;Prova;Gruppo Elettrogeno;Prova della pompa di rabbocco combustibile dal serbatoio di deposito al serbatoio di servizio, prova della valvola di intercettazione gasolio
+01;3;Controllo;Gruppo Elettrogeno;Controllo livello dell'olio, e livello del liquido refrigerante
+01;4;Controllo;Gruppo Elettrogeno;Controllo livello del liquido refrigerante, controllo cinghie del ventilatore (o motore elettrico) del radiatore, prova riscaldatore acqua e relativo circuito (termostato)
+01;5;Controllo;Gruppo Elettrogeno;Controllo livello e densità dell’elettrolita, controllo caricabatterie e corrente di carica (da rete con gruppo fermo e con gruppo in movimento), controllo cinghie di trascinamento, pulizia e serraggio dei terminali
+01;6;Controllo;Gruppo Elettrogeno;Controllo efficienza compressore, pressostati di lavoro e di sicurezza, pressione bombole di stoccaggio e tubazioni di adduzione aria al GE, scarico acqua di condensa dalle bombole
+01;7;Controllo;Gruppo Elettrogeno;Controllo del collegamento del regolatore di velocità alla pompa iniezione
+01;8;Prova;Gruppo Elettrogeno;Prova di avviamento e funzionamento a vuoto
+04;9;Manut.;Gruppo Elettrogeno;Pulizia filtri ed eliminazione morchie - Eventuale sostituzione filtri
+04;10;Controllo;Gruppo Elettrogeno;Controllo eventuale presenza di acqua nei serbatoi, e controllo tubi flessibili, raccordi, flange
+04;11;Controllo;Gruppo Elettrogeno;Controllo preriscaldatore olio (se montato) ed eventuale sistema di prelubrificazione e dello sfiato vapori olio dal carter
+04;12;Verifica;Gruppo Elettrogeno;Verifica che l’aria al radiatore sia sufficiente, controllo pompa/e dell’acqua, controllo stato delle connessioni e dei tubi flessibili, prova motorini elettrici delle serrande e relativi circuiti di controllo
+04;13;Controllo;Gruppo Elettrogeno;Controllo isolamento parti calde, controllo sezione delle tubazioni flessibili, controllo perdite, controllo drenaggio condensa
+04;14;Controllo;Gruppo Elettrogeno;Ispezione generale (compresi cunicoli, passerelle cavi, ecc.), controllo di cavi soggetti e movimento/vibrazioni (in corrispondenza dei punti di sfregamento)
+04;15;Prova;Gruppo Elettrogeno;Prova di funzionamento allarmi (preallarmi) e blocchi (allarmi con arresto)
+04;16;Controllo;Gruppo Elettrogeno;Controllo scatole di derivazione, quadri di controllo, quadri di potenza, quadri sinottici, sistemi di supervisione, ecc., controllo serraggio connessioni
+04;17;Verifica;Gruppo Elettrogeno;"Regolatore di velocità: se meccanico, verifica dell’olio interno; se elettronico, verifica del pick-up, delle tarature sulla scheda elettronica, verifica filtri aria"
+04;18;Controllo;Gruppo Elettrogeno;Controllo lunghezza spazzole, porta spazzole, movimento spazzole, superficie anelli, ecc. (per alternatori con spazzole)
+04;19;Prova;Gruppo Elettrogeno;Prova di avviamento e funzionamento a carico con commutazione dell'utenza su GE
+1;20;Verifica;Gruppo Elettrogeno;Verifica che i tubi di sfiato e di troppo pieno non siano ostruiti, che non ci siano perdite dal sistema di tubazioni
+1;21;Manut.;Gruppo Elettrogeno;Cambio olio e filtri
+1;22;Controllo;Gruppo Elettrogeno;Controllo antigelo (livello e densità)
+1;23;Manut.;Gruppo Elettrogeno;Pulizia scambiatore di calore, pulizia esterna (lato aria) del radiatore, ispezione condotti aria alle serrande (elettriche/a gravità)
+1;24;Controllo;Gruppo Elettrogeno;Controllo eccessiva contropressione, controllo supporti e staffe di sostegno delle tubazioni
+1;25;Controllo;Gruppo Elettrogeno;Prova sistema di accensione e controllo taratura carburante (motori a benzina e gas), prova pompa di iniezione e iniettori per portata combustibile, pressione, polverizzazione
+1;26;Controllo;Gruppo Elettrogeno;Controllo diodi rotanti, scaricatore/resistore, disco porta diodi rotanti (alternatori brushless), controllo rotore e statore principali, serraggio cavi di potenza e ausiliari, controllo cuscinetti (lubrificazione), controllo eccitatrice
+1;27;Controllo;Gruppo Elettrogeno;Controllo regolatore di tensione automatico e relativi accessori, misura (e trascrizione) dei valori di resistenza di isolamento, controllo sensori di temperatura dello statore principale
+3;28;Prova;Gruppo Elettrogeno;Prova degli interruttori/contattori di commutazione e dei relativi interblocchi meccanici ed elettrici, prova taratura dei relè di minima tensione (mancanza rete) e dei relè di protezione
+3;29;Prova;Gruppo Elettrogeno;Prova di isolamento dei cavi
+3;30;Controllo;Gruppo Elettrogeno;Controllo valvole-punterie, controllo coppia serraggio bulloni
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+Premessa Gruppo elettrogeno;;;;
+Le verifiche periodiche sul gruppo elettrogeno devono essere supportate dalla consultazione del manuale d'uso e manutenzione.;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;

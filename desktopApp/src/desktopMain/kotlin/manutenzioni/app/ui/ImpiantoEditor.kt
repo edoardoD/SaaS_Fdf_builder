@@ -31,7 +31,7 @@ import manutenzioni.app.data.ManutenzioniDatabase
  * @param onSave Callback per il salvataggio (validato)
  */
 @Composable
-fun ImpiantoEditor(
+fun ImpiantoEditor(componentiStandard: List<manutenzioni.domain.model.ComponenteStandard> = emptyList(), 
     impianto: Impianto,
     isNew: Boolean = impianto.codIntervento.isBlank(),
     isReadOnlyAdminFields: Boolean = false,
@@ -43,9 +43,13 @@ fun ImpiantoEditor(
     var codIntervento by remember(impianto) { mutableStateOf(impianto.codIntervento) }
     var nomeCompleto by remember(impianto) { mutableStateOf(impianto.nomeCompleto) }
     var premessa by remember(impianto) { mutableStateOf(impianto.premessa ?: "") }
-    var quantita by remember(impianto) { mutableStateOf(impianto.quantita.toString()) }
     var noteSpecifiche by remember(impianto) { mutableStateOf(impianto.noteSpecifiche ?: "") }
     var attivitaList by remember(impianto) { mutableStateOf(impianto.listaAttivita) }
+    
+    // Stato per QuadroBT
+    var siglaQuadro by remember(impianto) { mutableStateOf((impianto as? QuadroBT)?.sigla ?: "") }
+    var descrizioneQuadro by remember(impianto) { mutableStateOf((impianto as? QuadroBT)?.descrizioneQuadro ?: "") }
+    var interruttoriQuadro by remember(impianto) { mutableStateOf((impianto as? QuadroBT)?.listaInterruttori ?: emptyList()) }
 
     // Stato per la propagazione globale
     var propagaModifiche by remember { mutableStateOf(false) }
@@ -94,14 +98,21 @@ fun ImpiantoEditor(
                         nomeCompletoError = nomeCompleto.isBlank()
     
                         if (!codInterventoError && !nomeCompletoError) {
-                            val updated = impianto.copy(
+                            var updated = impianto.copyWithBasicParams(
                                 codIntervento = codIntervento.trim(),
                                 nomeCompleto = nomeCompleto.trim(),
                                 premessa = premessa.ifBlank { null },
-                                quantita = quantita.toIntOrNull() ?: 1,
+                                quantita = 1,
                                 noteSpecifiche = noteSpecifiche.ifBlank { null },
                                 listaAttivita = attivitaList
                             )
+                            if (updated is QuadroBT) {
+                                updated = updated.copy(
+                                    sigla = siglaQuadro.trim(),
+                                    descrizioneQuadro = descrizioneQuadro.trim(),
+                                    listaInterruttori = interruttoriQuadro
+                                )
+                            }
                             onSave(updated, propagaModifiche)
                         }
                     },
@@ -135,7 +146,7 @@ fun ImpiantoEditor(
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         errorBorderColor = Color(0xFFD32F2F)
                     ),
-                    placeholder = { Text("es. GE, CAB, QBT", fontSize = 12.sp) }
+                    placeholder = { Text("es. GE, CAB, Q", fontSize = 12.sp) }
                 )
                 if (codInterventoError) {
                     Text(
@@ -175,17 +186,25 @@ fun ImpiantoEditor(
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 4
                 )
-                if (impianto.cantiereId != null) {
-                    OutlinedTextField(
-                        value = quantita,
-                        onValueChange = { quantita = it },
-                        label = { Text("Quantità *") },
-                        modifier = Modifier.fillMaxWidth(0.3f),
-                        singleLine = true,
-                        readOnly = false, // Sempre editabile a livello di cantiere
-                        enabled = true,
-                        textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
-                    )
+                if (impianto is QuadroBT) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        OutlinedTextField(
+                            value = siglaQuadro,
+                            onValueChange = { siglaQuadro = it },
+                            label = { Text("Sigla Quadro") },
+                            modifier = Modifier.weight(0.3f),
+                            singleLine = true,
+                            textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
+                        )
+                        OutlinedTextField(
+                            value = descrizioneQuadro,
+                            onValueChange = { descrizioneQuadro = it },
+                            label = { Text("Descrizione / Ubicazione") },
+                            modifier = Modifier.weight(0.7f),
+                            singleLine = true,
+                            textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
+                        )
+                    }
                 }
             }
 
@@ -199,6 +218,75 @@ fun ImpiantoEditor(
                 }
             }
         }
+        }
+        if (impianto is QuadroBT) {
+            item {
+                Card(modifier = Modifier.fillMaxWidth(), elevation = 2.dp) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Interruttori (${interruttoriQuadro.size})", fontWeight = FontWeight.SemiBold)
+                            
+                            var espandiDropdown by remember { mutableStateOf(false) }
+                            val interruttoriStandard = componentiStandard.filter { it.tipo == manutenzioni.domain.model.TipoComponenteStandard.INTERRUTTORE_BT }
+                            
+                            Box {
+                                TextButton(onClick = { espandiDropdown = true }) {
+                                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Aggiungi Interruttore")
+                                }
+                                DropdownMenu(
+                                    expanded = espandiDropdown,
+                                    onDismissRequest = { espandiDropdown = false }
+                                ) {
+                                    if (interruttoriStandard.isEmpty()) {
+                                        DropdownMenuItem(onClick = { espandiDropdown = false }) {
+                                            Text("Nessun interruttore configurato", fontSize = 12.sp, color = Color.Gray)
+                                        }
+                                    } else {
+                                        interruttoriStandard.forEach { comp ->
+                                            DropdownMenuItem(
+                                                onClick = {
+                                                    val nuovoInt = manutenzioni.domain.model.InterruttoreBT(nome = comp.nome)
+                                                    interruttoriQuadro = interruttoriQuadro + nuovoInt
+                                                    espandiDropdown = false
+                                                }
+                                            ) {
+                                                Text(comp.nome, fontSize = 12.sp)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        interruttoriQuadro.forEach { interruttore ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.Build, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color.Gray)
+                                Spacer(Modifier.width(8.dp))
+                                Text(interruttore.nome, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                IconButton(
+                                    onClick = {
+                                        interruttoriQuadro = interruttoriQuadro - interruttore
+                                    },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Rimuovi", modifier = Modifier.size(16.dp), tint = Color(0xFFD32F2F))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         item {

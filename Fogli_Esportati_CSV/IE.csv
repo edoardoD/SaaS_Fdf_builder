@@ -1,0 +1,50 @@
+Impianto elettrico;;;;
+Periodicitˆ;Progressivo;Attivitˆ;Zona;Attivitˆ
+1;1;Controllo;Impianto elettrico;Controllo generale a vista sull'integritˆ dell'impianto di terra, stato di conservazione dei componenti e corretta installazione
+1;2;Verifica;Impianto elettrico;Verifica della corretta individuazione e segnalazione dei collettori di terra e dei nodi equipotenziali
+1;3;Verifica;Impianto elettrico;Verifica della corretta individuazione dei morsetti, della corretta colorazione dei conduttori e della corretta individuazione dei cavi
+1;4;Verifica;Impianto elettrico;Verifica del serraggio delle connessioni, sostituendo i componenti che presentano segni di ossidazione
+1;5;Manut.;Impianto elettrico;Verifica strumentale della continuitˆ elettrica del/i conduttore/i di terra
+1;6;Manut.;Impianto elettrico;Verifica strumentale della continuitˆ elettrica dei conduttori di protezione (a campione)
+1;7;Manutenzione;Impianto elettrico;Verifica strumentale della continuitˆ elettrica dei collegamenti equipotenziali principali
+1;8;Controllo;Impianto elettrico;Verifica strumentale della continuitˆ elettrica dei collegamenti equipotenziali secondari (a campione)
+1;9;Controllo;Impianto elettrico;Controllo generale a vista sull'integritˆ dell'impianto elettrico, stato di conservazione dei componenti, e corretta installazione
+1;10;Verifica;Impianto elettrico;Verifica del grado di protezione dai contatti diretti, barriere, distanziatori, e del grado IP dei componenti elettrici
+1;11;Controllo;Impianto elettrico;Controllo a vista sull'intergitˆ e stato di conservazione dei sistemi di distribuzione principale (canali, tubazioni, ecc.)
+1;12;Controllo;Impianto elettrico;Controllo a vista sull'intergitˆ e stato di conservazione dei condotti elettrificati (blindo-luce, -sbarre, -trolley, binari, ecc.)
+1;13;Controllo;Impianto elettrico;Controllo a vista sull'intergitˆ e stato di conservazione dei cavi elettrici, della protezione meccanica e/o radiazioni solari, ecc.
+1;14;Controllo;Impianto elettrico;Controllo a vista sull'intergitˆ e stato di conservazione dei sistemi di derivazione principali (cassette, scatole, ecc.)
+1;15;Controllo;Impianto elettrico;Controllo a vista sull'intergitˆ e stato di conservazione delle prese a spina, dei cavi di alimentazione delle utenze e le relative spine
+1;16;Controllo;Impianto elettrico;Controllo a vista sull'intergitˆ e stato di conservazione degli apparecchi di illuminazione ordinaria interni
+2;17;Misura;Impianto elettrico;Misura della resistenza dell'impianto di terra con Metodo Voltamperometrico
+2;18;Misura;Impianto elettrico;Misura strumentale del valore di resistenza del conduttore di terra
+2;19;misura;Impianto elettrico;Misura strumentale del valore di resistenza dei collegamenti equipotenziali principali
+NP;20;;;
+NP;21;;;
+NP;22;;;
+NP;23;;;
+NP;24;;;
+NP;25;;;
+NP;26;;;
+NP;27;;;
+NP;28;;;
+NP;29;;;
+NP;30;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+Premessa Impianto elettrico;;;;
+Prima di effettuare qualsiasi tipo di prova occorre verificare con i referenti del sito la effettiva possibilitˆ di svolgere le prove.I controlli a vista devono essere svolti senza influire sulle regolari attivitˆ lavorative del sito, mantenendo in ogni caso le condizioni di sicurezza per le persone.Le verifiche in quota devono essere svolte in condizioni di massima sicurezza per gli addetti e per le persone presenti nel sito, confinando le aree con opportune barriere e cartellonistica di avvertimento.;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;

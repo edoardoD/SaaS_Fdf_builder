@@ -1,0 +1,37 @@
+Selezione Attività;Periodicità;;Tipologia Schede;;Componenti Rilevazione incendi;;;;;;;;;
+ok;01;;CAB;Cabina MT/BT;;Prova dei Rivelatori di Fumo Puntiformi (prova sul 50% dell’impianto) impiegando dispositivi artificiali di produzione del fumo o di altro, simulando l'insorgere di un incendio;;;;;;;;
+no;02;;UPS;Gruppo di continuità;Rivelatori di Fumo Puntiformi;Prova dei Rivelatori di Fumo Puntiformi (prova sul 50% dell’impianto) impiegando dispositivi artificiali di produzione del fumo o di altro, simulando l'insorgere di un incendio;;;;;;;;
+;03;;QMT;Quadro Media Tensione;Rivelatori di Fumo Lineari;Prova dei Rivelatori di Fumo Lineari (prova sul 50% dell’impianto) impiegando filtri di oscuramento forniti dal costruttore per simulare l'insorgere di un incendio;;;;;;;;
+;04;;Q;Quadro elettrico;Rivelatori di Calore Puntiformi;Prova dei Rivelatori di Calore Lineari (prova 50% dell’impianto) impiegando dispositivi e strumenti predisposti allo scopo, suggeriti o forniti dal costruttore;;;;;;;;
+;05;;PEM;Sgancio generale emergenza;Rivelatori di Calore Lineari;Prova dei Sistemi di Rivelazione ad Aspirazione (prova del 50% dell’impianto) impiegando
+dispositivi e strumenti predisposti allo scopo, suggeriti o forniti dal costruttore;;;;;;;;
+;06;;EM;Illuminazione emergenza;Rivelazione ad Aspirazione;Prova dei Rivelatori per Condotta (prova del 50% dell’impianto) con dispositivi e strumenti
+predisposti allo scopo, in relazione al tubo di campionamento, suggeriti dal costruttore;;;;;;;;
+;1;;IS;Illuminazione sicurezza;Rivelatori per condotta;Prova dei Rivelatori di Fiamma (prova del 50% dell’impianto) impiegando dispositivi e strumenti predisposti allo scopo, suggeriti o forniti dal costruttore;;;;;;;;
+;2;;IE;Impianto elettrico;Rivelatori di fiamma;Prova dei Pulsanti di Allarme Manuale di Incendio (prova sul 50% dell’impianto) impiegando gli utensili forniti dal costruttore per la simulazione della rottura vetro;;;;;;;;
+;3;;RI;Rilevazione incendi;Pulsanti Allarme Manuale;Prova dei Pulsanti Allarme Manuale (prova del 50% dell’impianto) impiegando dispositivi e
+strumenti predisposti allo scopo, suggeriti o forniti dal costruttore;;;;;;;;
+;4;;TRFS;Trasformatore MT/BT a secco;Segnalatori Ottico Acustici;Prova dei Segnalatori Ottico Acustici (prova del 50% dell’impianto) impiegando dispositivi e strumenti predisposti allo scopo, suggeriti o forniti dal costruttore;;;;;;;;
+;5;;TRFO;Trasformatore MT/BT in olio;Comando Serrande;Prova dei moduli di ingresso/uscita e del Comando dei Fermi Elettromagnetici (prova del 50% dell’impianto) impiegando dispositivi e strumenti predisposti allo scopo;;;;;;;;
+;;;FTV;Impianto fotovoltaico;Comando Fermi Elettromagnetici;Prova dei moduli di ingresso/uscita e del Comando di Attuatori dei Sistemi di Estinzione (prova del 50% dell’impianto) impiegando dispositivi e strumenti predisposti allo scopo;;;;;;;;
+;;;SPD;Limitatori Sovratensione;Attuatori sistema di estinzione;Prova dei Rivelatori di GAS Puntiformi impiegando dispositivi artificiali di produzione di gas, simulando l'insorgere di un perdita di gas in funzione delle percentuali di concentrazione impostate in centrale.;;;;;;;;
+;;;GE;Gruppo elettrogeno;Rivelatori GAS;Prova dei Rivelatori di GAS Puntiformi impiegando dispositivi artificiali di produzione di gas, simulando l'insorgere di un perdita di gas in funzione delle percentuali di concentrazione impostate in centrale.;;;;;;;;
+;;;RIF;Rifasamento;;;;;;;;;;
+;;;BACS;Building Automation Contro System;;;;;;;;;;
+;;;DEG;Degenze;;;;;;;;;;
+;;;AMB;Ambulatori;;;;;;;;;;
+;;;DS;Impianto Diffusione Sonora;;;;;;;;;;
+;;;RIG;Rilevazione Gas;;;;;;;;;;
+;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+;RI;;DIFF;;R;;;;;;;;;
+;MOD;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+AUTONOMIA LAMPADE;;;;;;;;;;;;;;
+1 ora;;;;;;;;;;;;;;
+2 ore;;;;;;;;;;;;;;
+3 ore;;;;;;;;;;;;;;
+4 ore;;;;;;;;;;;;;;
+5 ore;;;;;;;;;;;;;;

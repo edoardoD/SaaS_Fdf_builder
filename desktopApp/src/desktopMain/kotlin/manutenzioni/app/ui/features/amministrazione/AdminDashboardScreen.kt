@@ -11,20 +11,32 @@ import manutenzioni.app.ui.theme.SlateBorder
 
 import manutenzioni.app.ui.ManutenzioniViewModel
 
+import androidx.compose.ui.Alignment
+
 @Composable
 fun AdminDashboardScreen(
     state: ManutenzioniUiState,
     viewModel: ManutenzioniViewModel,
-    onTabSelected: (AdminTab) -> Unit
+    onTabSelected: (AdminTab) -> Unit,
+    onDisconnect: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp)
     ) {
-        Text(
-            text = "Amministrazione",
-            style = MaterialTheme.typography.h5,
-            color = MaterialTheme.colors.onBackground
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Amministrazione",
+                style = MaterialTheme.typography.h5,
+                color = MaterialTheme.colors.onBackground
+            )
+            OutlinedButton(onClick = onDisconnect) {
+                Text("Disconnetti DB", color = MaterialTheme.colors.error)
+            }
+        }
         Spacer(modifier = Modifier.height(24.dp))
         
         TabRow(
@@ -68,7 +80,8 @@ fun AdminDashboardScreen(
                 AdminTab.IMPIANTI_GLOBALI -> {
                     AdminImpiantiGlobaliTab(
                         impiantiGlobali = state.impiantiGlobali,
-                        onUpdateGlobale = { viewModel.updateImpiantoGlobale(it) }
+                        componentiStandard = state.componentiStandard,
+                        onUpdateGlobale = viewModel::updateImpiantoGlobale
                     )
                 }
             }

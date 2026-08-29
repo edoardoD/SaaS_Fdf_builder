@@ -25,4 +25,8 @@ interface ManutenzioneRepository {
     suspend fun salvaCantiere(cantiere: Cantiere)
     suspend fun updateCantiere(id: String, newName: String)
     suspend fun eliminaCantiere(id: String)
+    
+    // --- Anagrafica Componenti ---
+    suspend fun caricaComponentiStandard(): List<manutenzioni.domain.model.ComponenteStandard>
+    suspend fun salvaComponenteStandard(componente: manutenzioni.domain.model.ComponenteStandard)
 }

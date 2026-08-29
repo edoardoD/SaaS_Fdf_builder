@@ -31,9 +31,10 @@ class JsonManutenzioneRepository(
     private var cache: MutableList<Impianto>? = null
     private var cacheClienti: MutableList<Cliente>? = null
     private var cacheCantieri: MutableList<Cantiere>? = null
+    private var cacheComponenti: MutableList<manutenzioni.domain.model.ComponenteStandard>? = null
 
     init {
-        println("📂 Database log: \${dbFile.absolutePath}")
+        println("📂 Database log: ${dbFile.absolutePath}")
         copyDefaultIfMissing()
     }
 
@@ -62,10 +63,10 @@ class JsonManutenzioneRepository(
 
             if (defaultJson != null) {
                 dbFile.writeText(defaultJson)
-                println("✓ Database demo copiato in: \${dbFile.absolutePath}")
+                println("✓ Database demo copiato in: ${dbFile.absolutePath}")
             } else {
                 // Crea un database vuoto
-                val emptyDb = ManutenzioniDatabase(emptyList(), emptyList(), emptyList())
+                val emptyDb = ManutenzioniDatabase(emptyList(), emptyList(), emptyList(), emptyList())
                 dbFile.writeText(json.encodeToString(ManutenzioniDatabase.serializer(), emptyDb))
                 println("⚠ Database demo non trovato nelle resources. Creato database vuoto.")
             }
@@ -77,13 +78,18 @@ class JsonManutenzioneRepository(
             val content = dbFile.readText()
             json.decodeFromString(ManutenzioniDatabase.serializer(), content)
         } catch (e: Exception) {
-            println("Errore nel caricamento del database: \${e.message}")
-            ManutenzioniDatabase(emptyList(), emptyList(), emptyList())
+            println("Errore nel caricamento del database: ${e.message}")
+            ManutenzioniDatabase(emptyList(), emptyList(), emptyList(), emptyList())
         }
     }
 
-    private fun saveToDisk(impianti: List<Impianto>, clienti: List<Cliente>, cantieri: List<Cantiere>) {
-        val db = ManutenzioniDatabase(impianti, clienti, cantieri)
+    private fun saveToDisk(
+        impianti: List<Impianto> = getImpiantiCache(), 
+        clienti: List<Cliente> = getClientiCache(), 
+        cantieri: List<Cantiere> = getCantieriCache(),
+        componenti: List<manutenzioni.domain.model.ComponenteStandard> = getComponentiCache()
+    ) {
+        val db = ManutenzioniDatabase(impianti, clienti, cantieri, componenti)
         dbFile.writeText(json.encodeToString(ManutenzioniDatabase.serializer(), db))
     }
 
@@ -96,6 +102,9 @@ class JsonManutenzioneRepository(
             }
             if (cacheCantieri == null) {
                 cacheCantieri = db.cantieri.toMutableList()
+            }
+            if (cacheComponenti == null) {
+                cacheComponenti = db.componenti.toMutableList()
             }
         }
         return cache!!
@@ -111,6 +120,9 @@ class JsonManutenzioneRepository(
             if (cacheCantieri == null) {
                 cacheCantieri = db.cantieri.toMutableList()
             }
+            if (cacheComponenti == null) {
+                cacheComponenti = db.componenti.toMutableList()
+            }
         }
         return cacheClienti!!
     }
@@ -122,8 +134,21 @@ class JsonManutenzioneRepository(
             // Assicura che anche le altre cache siano popolate
             getImpiantiCache()
             getClientiCache()
+            getComponentiCache()
         }
         return cacheCantieri!!
+    }
+
+    private fun getComponentiCache(): MutableList<manutenzioni.domain.model.ComponenteStandard> {
+        if (cacheComponenti == null) {
+            val db = loadFromDisk()
+            cacheComponenti = db.componenti.toMutableList()
+            // Assicura che anche le altre cache siano popolate
+            getImpiantiCache()
+            getClientiCache()
+            getCantieriCache()
+        }
+        return cacheComponenti!!
     }
 
     // === Impianti CRUD ===
@@ -136,7 +161,7 @@ class JsonManutenzioneRepository(
         } else {
             list.add(impianto)
         }
-        saveToDisk(list, getClientiCache(), getCantieriCache())
+        saveToDisk()
     }
 
     override suspend fun caricaImpianti(): List<Impianto> = mutex.withLock {
@@ -146,7 +171,7 @@ class JsonManutenzioneRepository(
     override suspend fun eliminaImpianto(id: String) = mutex.withLock {
         val list = getImpiantiCache()
         list.removeAll { it.id == id }
-        saveToDisk(list, getClientiCache(), getCantieriCache())
+        saveToDisk()
     }
 
     override suspend fun getImpianto(codIntervento: String): Impianto? = mutex.withLock {
@@ -155,9 +180,13 @@ class JsonManutenzioneRepository(
 
     override suspend fun aggiornaImpiantiGlobalmente(impiantoTemplate: Impianto) = mutex.withLock {
         val list = getImpiantiCache()
+        var hasGlobal = false
         for (i in list.indices) {
             if (list[i].codIntervento == impiantoTemplate.codIntervento) {
-                list[i] = list[i].copy(
+                if (list[i].cantiereId == null) {
+                    hasGlobal = true
+                }
+                list[i] = list[i].copyWithBasicParams(
                     nomeCompleto = impiantoTemplate.nomeCompleto,
                     premessa = impiantoTemplate.premessa,
                     listaAttivita = impiantoTemplate.listaAttivita,
@@ -166,7 +195,10 @@ class JsonManutenzioneRepository(
                 )
             }
         }
-        saveToDisk(list, getClientiCache(), getCantieriCache())
+        if (!hasGlobal) {
+            list.add(impiantoTemplate.copyWithBasicParams(cantiereId = null))
+        }
+        saveToDisk()
     }
 
     // === Clienti CRUD ===
@@ -183,7 +215,7 @@ class JsonManutenzioneRepository(
         } else {
             list.add(cliente)
         }
-        saveToDisk(getImpiantiCache(), list, getCantieriCache())
+        saveToDisk()
     }
 
     override suspend fun updateCliente(id: String, newName: String) = mutex.withLock {
@@ -192,7 +224,7 @@ class JsonManutenzioneRepository(
         if (index >= 0) {
             val cliente = list[index]
             list[index] = cliente.copy(nome = newName)
-            saveToDisk(getImpiantiCache(), list, getCantieriCache())
+            saveToDisk()
         }
     }
 
@@ -208,7 +240,7 @@ class JsonManutenzioneRepository(
         // Gli impianti template hanno cantiereId = null, quindi non verranno mai eliminati da questa operazione
         listImpianti.removeAll { it.cantiereId != null && it.cantiereId in cantieriDaEliminare }
         
-        saveToDisk(listImpianti, listClienti, listCantieri)
+        saveToDisk()
     }
 
     // === Getters for new workflow ===
@@ -231,7 +263,7 @@ class JsonManutenzioneRepository(
         } else {
             list.add(cantiere)
         }
-        saveToDisk(getImpiantiCache(), getClientiCache(), list)
+        saveToDisk()
     }
 
     override suspend fun updateCantiere(id: String, newName: String) = mutex.withLock {
@@ -240,13 +272,30 @@ class JsonManutenzioneRepository(
         if (index >= 0) {
             val cantiere = list[index]
             list[index] = cantiere.copy(nome = newName)
-            saveToDisk(getImpiantiCache(), getClientiCache(), list)
+            saveToDisk()
         }
     }
 
     override suspend fun eliminaCantiere(id: String) = mutex.withLock {
         val list = getCantieriCache()
         list.removeAll { it.id == id }
-        saveToDisk(getImpiantiCache(), getClientiCache(), list)
+        saveToDisk()
+    }
+
+    // === Componenti CRUD ===
+    
+    override suspend fun caricaComponentiStandard(): List<manutenzioni.domain.model.ComponenteStandard> = mutex.withLock {
+        return getComponentiCache().toList()
+    }
+
+    override suspend fun salvaComponenteStandard(componente: manutenzioni.domain.model.ComponenteStandard) = mutex.withLock {
+        val list = getComponentiCache()
+        val index = list.indexOfFirst { it.id == componente.id }
+        if (index >= 0) {
+            list[index] = componente
+        } else {
+            list.add(componente)
+        }
+        saveToDisk()
     }
 }

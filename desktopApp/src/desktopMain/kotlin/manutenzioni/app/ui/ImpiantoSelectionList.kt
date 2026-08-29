@@ -22,7 +22,6 @@ fun ImpiantoSelectionList(
     onSelectionChanged: (String, Boolean) -> Unit,
     onEditImpianto: (Impianto) -> Unit,
     onDeleteImpianto: (Impianto) -> Unit,
-    onQuantitaChanged: (Impianto, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (impianti.isEmpty()) {
@@ -40,8 +39,11 @@ fun ImpiantoSelectionList(
             modifier = Modifier.padding(bottom = 16.dp)
         )
         
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(impianti, key = { it.codIntervento }) { impianto ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(impianti, key = { it.id }) { impianto ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = 2.dp
@@ -52,11 +54,11 @@ fun ImpiantoSelectionList(
                             .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val isSelected = selectionState[impianto.codIntervento] == true
+                        val isSelected = selectionState[impianto.id] == true
                         Checkbox(
                             checked = isSelected,
                             onCheckedChange = { checked ->
-                                onSelectionChanged(impianto.codIntervento, checked)
+                                onSelectionChanged(impianto.id, checked)
                             }
                         )
                         
@@ -74,21 +76,13 @@ fun ImpiantoSelectionList(
                             )
                         }
                         
-                        var textQuantita by remember(impianto.quantita) { mutableStateOf(impianto.quantita.toString()) }
-                        OutlinedTextField(
-                            value = textQuantita,
-                            onValueChange = { newValue ->
-                                textQuantita = newValue
-                                val intVal = newValue.toIntOrNull()
-                                if (intVal != null && intVal > 0) {
-                                    onQuantitaChanged(impianto, intVal)
-                                }
-                            },
-                            label = { Text("Q.tà", fontSize = 10.sp) },
-                            modifier = Modifier.width(64.dp).padding(end = 8.dp),
-                            singleLine = true,
-                            textStyle = LocalTextStyle.current.copy(fontSize = 12.sp)
-                        )
+                        if (impianto is manutenzioni.domain.model.QuadroBT && impianto.sigla.isNotBlank()) {
+                            Text(
+                                text = "Sigla: ${impianto.sigla}",
+                                style = MaterialTheme.typography.caption,
+                                modifier = Modifier.padding(end = 12.dp)
+                            )
+                        }
 
                         Row {
                             IconButton(onClick = { onEditImpianto(impianto) }) {

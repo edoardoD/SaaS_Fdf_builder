@@ -32,7 +32,12 @@ class HtmlService(
         var html = loadTemplate()
 
         // Sostituzione placeholder header
-        html = html.replace("<!-- COD_SCHEDA -->", escapeHtml(impianto.codIntervento))
+        val cod = if (impianto is manutenzioni.domain.model.QuadroBT && impianto.sigla.isNotBlank()) {
+            "${impianto.codIntervento} - ${impianto.sigla}"
+        } else {
+            impianto.codIntervento
+        }
+        html = html.replace("<!-- COD_SCHEDA -->", escapeHtml(cod))
         html = html.replace("<!-- OGGETTO -->", escapeHtml(impianto.nomeCompleto))
         html = html.replace("<!-- PERIODICITA -->", escapeHtml(frequenza.label()))
         val premessaCompleta = buildString {
@@ -40,6 +45,16 @@ class HtmlService(
             if (!impianto.noteSpecifiche.isNullOrBlank()) {
                 if (isNotEmpty()) append("\n\n")
                 append("Note specifiche cantiere:\n").append(impianto.noteSpecifiche)
+            }
+            if (impianto is manutenzioni.domain.model.QuadroBT) {
+                if (isNotEmpty()) append("\n\n")
+                if (impianto.descrizioneQuadro.isNotBlank()) {
+                    append("Ubicazione Quadro: ").append(impianto.descrizioneQuadro).append("\n")
+                }
+                if (impianto.listaInterruttori.isNotEmpty()) {
+                    append("Interruttori presenti: ")
+                    append(impianto.listaInterruttori.joinToString(", ") { it.nome })
+                }
             }
         }
         html = html.replace("<!-- PREMESSA -->", escapeHtml(premessaCompleta))

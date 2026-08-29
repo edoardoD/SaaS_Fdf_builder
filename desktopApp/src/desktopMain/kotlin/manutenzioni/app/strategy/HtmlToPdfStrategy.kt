@@ -25,11 +25,18 @@ class HtmlToPdfStrategy(
     private val pdfEngine: Pdf = Pdf()
 ) : AbstractPdfGeneratorStrategy() {
 
-    override fun generate(impianto: Impianto, frequenza: Periodo, outputPath: String, clienteNome: String?): File {
-        // 1. Filtra attività per frequenza inclusiva
-        val attivitaFiltrate = FrequencyFilter.filterByFrequenza(
-            attivita = impianto.listaAttivita,
-            frequenzaSelezionata = frequenza
+    override fun generate(
+        impianto: Impianto,
+        frequenza: Periodo,
+        outputPath: String,
+        clienteNome: String?,
+        contextImpianti: List<Impianto>
+    ): File {
+        // 1. Filtra attività per frequenza inclusiva e componenti del cantiere
+        val attivitaFiltrate = manutenzioni.domain.service.AntincendioAttivitaResolver.resolveAttivita(
+            impianto = impianto,
+            impiantiNelCantiere = contextImpianti,
+            frequenza = frequenza
         )
 
         if (attivitaFiltrate.isEmpty()) {

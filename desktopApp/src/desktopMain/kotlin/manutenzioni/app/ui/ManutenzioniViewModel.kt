@@ -40,8 +40,7 @@ enum class AdminTab {
 data class ManutenzioniUiState(
     val impianti: List<Impianto> = emptyList(),
     val selectedImpianto: Impianto? = null,
-    val frequenzeDisponibili: List<Periodo> = emptyList(),
-    val selectedFrequenza: Periodo? = null,
+    val frequenzePerImpianto: Map<String, Periodo> = emptyMap(),
     val clienti: List<Cliente> = emptyList(),
     val selectedCliente: Cliente? = null,
     val cantieriDisponibili: List<Cantiere> = emptyList(),
@@ -58,7 +57,8 @@ data class ManutenzioniUiState(
     /** Progresso batch: "Generazione copia X di N..." (null se non in corso) */
     val batchProgress: String? = null,
     /** Lista dei file generati nell'ultimo batch */
-    val generatedFiles: List<File> = emptyList()
+    val generatedFiles: List<File> = emptyList(),
+    val componentiStandard: List<manutenzioni.domain.model.ComponenteStandard> = emptyList()
 )
 
 /**
@@ -101,6 +101,17 @@ class ManutenzioniViewModel(
                         errorMessage = "Errore caricamento: ${e.message}"
                     )
                 }
+            }
+        }
+    }
+    
+    private fun loadComponentiStandard() {
+        scope.launch {
+            try {
+                val componenti = repository.caricaComponentiStandard()
+                _uiState.update { it.copy(componentiStandard = componenti) }
+            } catch (e: Exception) {
+                // Ignore for now, or log
             }
         }
     }
@@ -207,7 +218,6 @@ class ManutenzioniViewModel(
                         selectedCantiere = if (isCurrent) null else state.selectedCantiere,
                         impiantiDelCantiere = if (isCurrent) emptyList() else state.impiantiDelCantiere,
                         impiantiSelezionati = if (isCurrent) emptyMap() else state.impiantiSelezionati,
-                        frequenzeDisponibili = if (isCurrent) emptyList() else state.frequenzeDisponibili,
                         selectedImpianto = if (isCurrent) null else state.selectedImpianto,
                         statusMessage = "✓ Cliente eliminato con successo",
                         errorMessage = null
@@ -280,14 +290,11 @@ class ManutenzioniViewModel(
 
     /** Seleziona un impianto e calcola le frequenze disponibili */
     fun selectImpianto(impianto: Impianto) {
-        val frequenze = FrequencyFilter.frequenzeDisponibili(impianto.listaAttivita)
         _uiState.update {
             it.copy(
                 selectedImpianto = impianto,
-                frequenzeDisponibili = frequenze,
-                selectedFrequenza = null,
                 pdfFile = null,
-                statusMessage = "${impianto.nomeCompleto} — seleziona una frequenza",
+                statusMessage = "${impianto.nomeCompleto} — seleziona",
                 errorMessage = null
             )
         }
@@ -301,27 +308,18 @@ class ManutenzioniViewModel(
             updatedSelection.remove(impiantoId)
         }
 
-        // Ricalcola le frequenze unendo tutte le attività degli impianti attualmente selezionati
-        val impiantiSelezionatiIds = updatedSelection.filter { it.value }.keys
-        val attivitaSelezionate = _uiState.value.impiantiDelCantiere
-            .filter { it.codIntervento in impiantiSelezionatiIds }
-            .flatMap { it.listaAttivita }
-            
-        val nuoveFrequenze = FrequencyFilter.frequenzeDisponibili(attivitaSelezionate)
-
         _uiState.update { state ->
             state.copy(
-                impiantiSelezionati = updatedSelection,
-                frequenzeDisponibili = nuoveFrequenze,
-                // Resetta la frequenza selezionata se non è più valida per la nuova selezione
-                selectedFrequenza = if (nuoveFrequenze.contains(state.selectedFrequenza)) state.selectedFrequenza else null
+                impiantiSelezionati = updatedSelection
             )
         }
     }
 
-    /** Seleziona una frequenza e genera automaticamente il PDF */
-    fun selectFrequenza(frequenza: Periodo) {
-        _uiState.update { it.copy(selectedFrequenza = frequenza) }
+    /** Imposta la frequenza scelta per uno specifico impianto (tramite codIntervento o id) */
+    fun updateFrequenzaForImpianto(impiantoId: String, frequenza: Periodo) {
+        val updatedFrequenze = _uiState.value.frequenzePerImpianto.toMutableMap()
+        updatedFrequenze[impiantoId] = frequenza
+        _uiState.update { it.copy(frequenzePerImpianto = updatedFrequenze) }
     }
 
     /** Cambia la sezione corrente dell'app */
@@ -381,12 +379,13 @@ class ManutenzioniViewModel(
             _uiState.update { it.copy(errorMessage = "Nessun impianto selezionato.") }
             return
         }
-        val frequenza = state.selectedFrequenza ?: return
+        // Non possiamo più bloccare se non c'è una "frequenza globale", procediamo.
+        // La frequenza sarà letta dall'impianto stesso. Se manca, saltiamo o usiamo default.
 
         val outputDir = selectOutputDirectoryCompatibile() ?: return
 
         scope.launch {
-            val impiantiDaGenerare = state.impiantiDelCantiere.filter { it.codIntervento in impiantiSelezionatiIds }
+            val impiantiDaGenerare = state.impiantiDelCantiere.filter { it.id in impiantiSelezionatiIds }
 
             _uiState.update {
                 it.copy(
@@ -407,15 +406,16 @@ class ManutenzioniViewModel(
                     val batchResult = withContext(Dispatchers.IO) {
                         pdfStrategy.generateBatch(
                             impianto = impianto,
-                            frequenza = frequenza,
+                            frequenza = state.frequenzePerImpianto[impianto.id] ?: Periodo(manutenzioni.domain.model.TipoPeriodo.A, 1),
                             outputDir = outputDir,
-                            copies = impianto.quantita,
+                            copies = 1,
                             clienteNome = state.selectedCliente?.nome,
+                            contextImpianti = state.impiantiDelCantiere,
                             onProgress = { current, total ->
                                 _uiState.update {
                                     it.copy(
                                         batchProgress = "Impianto ${index + 1}/${impiantiDaGenerare.size}: PDF $current di $total...",
-                                        statusMessage = "Generazione ${impianto.codIntervento}..."
+                                        statusMessage = "Generazione ${impianto.id}..."
                                     )
                                 }
                             }
@@ -425,11 +425,11 @@ class ManutenzioniViewModel(
                     totalSuccessCount += batchResult.successCount
                     if (!batchResult.isFullSuccess) {
                         batchResult.errors.forEach { (copy, error) ->
-                            totalErrors["${impianto.codIntervento} (copia $copy)"] = error
+                            totalErrors["${impianto.id} (copia $copy)"] = error
                         }
                     }
                 } catch (e: Exception) {
-                    totalErrors[impianto.codIntervento] = e.message ?: "Errore sconosciuto"
+                    totalErrors[impianto.id] = e.message ?: "Errore sconosciuto"
                 }
             }
 
@@ -466,38 +466,40 @@ class ManutenzioniViewModel(
 
     /**
      * Crea un nuovo impianto vuoto, lo seleziona e apre l'editor.
-     * L'utente potrà compilare codice, nome, premessa e attività dall'editor.
+     * Se è passato un template, lo persiste direttamente per il cantiere.
      */
-    fun createNewImpianto(template: Impianto? = null, quantita: Int = 1) {
-        val newImpianto = template?.copy(
+    fun createNewImpianto(template: Impianto? = null) {
+        val newImpianto = template?.copyWithBasicParams(
             id = java.util.UUID.randomUUID().toString(),
             cantiereId = _uiState.value.selectedCantiere?.id,
-            quantita = quantita
-        ) ?: Impianto(
+            quantita = 1
+        ) ?: manutenzioni.domain.model.ImpiantoStandard(
             id = java.util.UUID.randomUUID().toString(),
             codIntervento = "",
             nomeCompleto = "",
             premessa = null,
             listaAttivita = emptyList(),
             cantiereId = _uiState.value.selectedCantiere?.id,
-            quantita = quantita
+            quantita = 1
         )
-        _uiState.update {
-            it.copy(
-                selectedImpianto = newImpianto,
-                frequenzeDisponibili = emptyList(),
-                selectedFrequenza = null,
-                pdfFile = null,
-                statusMessage = "Nuovo impianto — compila i dati e salva",
-                errorMessage = null
-            )
+        if (template != null) {
+            saveImpianto(newImpianto)
+        } else {
+            _uiState.update {
+                it.copy(
+                    selectedImpianto = newImpianto,
+                    pdfFile = null,
+                    statusMessage = "Nuovo impianto — compila i dati e salva",
+                    errorMessage = null
+                )
+            }
         }
     }
 
     /** Salva un impianto (nuovo o modificato) e aggiorna la lista */
     fun saveImpianto(impianto: Impianto) {
         // Validazione campi obbligatori
-        if (impianto.codIntervento.isBlank()) {
+        if (impianto.id.isBlank()) {
             _uiState.update {
                 it.copy(errorMessage = "Il codice intervento è obbligatorio")
             }
@@ -514,8 +516,7 @@ class ManutenzioniViewModel(
             try {
                 repository.salvaImpianto(impianto)
                 val impiantiAggiornati = repository.caricaImpianti()
-                val frequenze = FrequencyFilter.frequenzeDisponibili(impianto.listaAttivita)
-                
+                loadImpiantiGlobali()
                 // Aggiorna la lista degli impianti del cantiere corrente
                 val impiantiDelCantiereAggiornati = _uiState.value.selectedCantiere?.id?.let { cantiereId ->
                     repository.getImpiantiForCantiere(cantiereId)
@@ -526,8 +527,7 @@ class ManutenzioniViewModel(
                         impianti = impiantiAggiornati,
                         impiantiDelCantiere = impiantiDelCantiereAggiornati, // Fix: ricarica lista
                         selectedImpianto = impianto,
-                        frequenzeDisponibili = frequenze,
-                        statusMessage = "✓ Impianto ${impianto.codIntervento} salvato",
+                        statusMessage = "✓ Impianto ${impianto.id} salvato",
                         errorMessage = null
                     )
                 }
@@ -557,25 +557,13 @@ class ManutenzioniViewModel(
                 _uiState.update { state ->
                     val isCurrent = state.selectedImpianto?.id == id
                     val updatedSelection = state.impiantiSelezionati.toMutableMap()
-                    
-                    if (codIntervento != null) {
-                        updatedSelection.remove(codIntervento)
-                    }
+                    updatedSelection.remove(id)
 
-                    // Ricalcolo frequenze dinamico
-                    val impiantiSelezionatiIds = updatedSelection.filter { it.value }.keys
-                    val attivitaSelezionate = impiantiDelCantiereAggiornati
-                        .filter { it.codIntervento in impiantiSelezionatiIds }
-                        .flatMap { it.listaAttivita }
-                    val nuoveFrequenze = FrequencyFilter.frequenzeDisponibili(attivitaSelezionate)
-                    
                     state.copy(
                         impianti = impiantiAggiornati,
                         impiantiDelCantiere = impiantiDelCantiereAggiornati,
                         selectedImpianto = if (isCurrent) null else state.selectedImpianto,
                         impiantiSelezionati = updatedSelection,
-                        frequenzeDisponibili = nuoveFrequenze,
-                        selectedFrequenza = if (nuoveFrequenze.contains(state.selectedFrequenza)) state.selectedFrequenza else null,
                         statusMessage = "✓ Impianto eliminato con successo",
                         errorMessage = null
                     )
@@ -588,20 +576,18 @@ class ManutenzioniViewModel(
 
     /** Aggiorna l'impianto su tutti i cantieri in cui è presente */
     fun updateImpiantoGlobale(impianto: Impianto) {
-        if (impianto.codIntervento.isBlank() || impianto.nomeCompleto.isBlank()) return
+        if (impianto.id.isBlank() || impianto.nomeCompleto.isBlank()) return
 
         scope.launch {
             try {
                 repository.aggiornaImpiantiGlobalmente(impianto)
                 loadImpiantiGlobali()
                 val impiantiAggiornati = repository.caricaImpianti()
-                val frequenze = FrequencyFilter.frequenzeDisponibili(impianto.listaAttivita)
                 _uiState.update {
                     it.copy(
                         impianti = impiantiAggiornati,
                         selectedImpianto = impianto,
-                        frequenzeDisponibili = frequenze,
-                        statusMessage = "✓ Impianto ${impianto.codIntervento} aggiornato globalmente",
+                        statusMessage = "✓ Impianto ${impianto.id} aggiornato globalmente",
                         errorMessage = null
                     )
                 }
@@ -618,6 +604,7 @@ class ManutenzioniViewModel(
     fun refresh() {
         loadImpianti()
         loadClienti()
+        loadComponentiStandard()
         _uiState.value.selectedCliente?.let {
             loadCantieriForCliente(it.id)
         }

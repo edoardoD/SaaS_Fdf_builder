@@ -31,6 +31,10 @@ kotlin {
                 // Serializzazione JSON
                 implementation(libs.kotlinx.serialization.json)
 
+                // MongoDB
+                implementation(libs.mongodb.driver.kotlin.coroutine)
+                implementation(libs.bson.kotlinx)
+
                 // Coroutines
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.coroutines.swing)
@@ -49,12 +53,19 @@ kotlin {
                 implementation("org.openjfx:javafx-graphics:21.0.2:$javafxPlatform")
             }
         }
+
+        val desktopTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+            }
+        }
     }
 }
 
 compose.desktop {
     application {
-        mainClass = "manutenzioni.app.MainKt"
+        mainClass = (project.findProperty("mainClass") as? String) ?: "manutenzioni.app.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)

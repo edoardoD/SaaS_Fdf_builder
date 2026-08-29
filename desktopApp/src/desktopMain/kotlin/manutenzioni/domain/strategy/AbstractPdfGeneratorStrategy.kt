@@ -39,7 +39,8 @@ abstract class AbstractPdfGeneratorStrategy : PdfBatchGenerator {
         impianto: Impianto,
         frequenza: Periodo,
         outputPath: String,
-        clienteNome: String? = null
+        clienteNome: String? = null,
+        contextImpianti: List<Impianto> = emptyList()
     ): File
 
     /**
@@ -55,6 +56,7 @@ abstract class AbstractPdfGeneratorStrategy : PdfBatchGenerator {
         outputDir: File,
         copies: Int,
         clienteNome: String?,
+        contextImpianti: List<Impianto>,
         onProgress: (current: Int, total: Int) -> Unit
     ): BatchResult {
         require(copies >= 1) { "Il numero di copie deve essere >= 1" }
@@ -71,7 +73,7 @@ abstract class AbstractPdfGeneratorStrategy : PdfBatchGenerator {
                     "${baseName}_copia_$i.pdf"
                 }
                 val outputPath = File(outputDir, fileName).absolutePath
-                val file = generate(impianto, frequenza, outputPath, clienteNome)
+                val file = generate(impianto, frequenza, outputPath, clienteNome, contextImpianti)
                 generatedFiles.add(file)
             } catch (e: Exception) {
                 errors[i] = e.message ?: "Errore sconosciuto"

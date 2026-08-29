@@ -2,11 +2,14 @@ package manutenzioni.app.ui.features.operativita
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,10 +30,10 @@ fun CantiereDetailScreen(
     onImpiantoSelectionChanged: (String, Boolean) -> Unit,
     onEditImpianto: (Impianto) -> Unit,
     onSaveImpianto: (Impianto) -> Unit,
-    onFrequenzaSelected: (Periodo) -> Unit,
+    onFrequenzaPerImpiantoSelected: (String, Periodo) -> Unit,
     onGeneraPdf: () -> Unit,
     onOpenPdf: () -> Unit,
-    onCreateNewImpianto: (Impianto?, Int) -> Unit,
+    onCreateNewImpianto: (Impianto?) -> Unit,
     onDeleteImpianto: (String) -> Unit
 ) {
     // Gestione visualizzazione ImpiantoEditor
@@ -38,12 +41,15 @@ fun CantiereDetailScreen(
     var showNuovoImpiantoDialog by remember { mutableStateOf(false) }
     var showDeleteImpiantoDialog by remember { mutableStateOf(false) }
     var impiantoInEliminazione by remember { mutableStateOf<Impianto?>(null) }
+    var showMassiveQuadroDialog by remember { mutableStateOf(false) }
+    var selectedQuadroTemplate by remember { mutableStateOf<manutenzioni.domain.model.Impianto?>(null) }
 
     if (impiantoInModifica != null) {
         Box(modifier = Modifier.fillMaxSize().padding(32.dp)) {
             Card(elevation = 8.dp, shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxSize()) {
                 ImpiantoEditor(
                     impianto = impiantoInModifica!!,
+                    componentiStandard = state.componentiStandard,
                     isReadOnlyAdminFields = true,
                     onSave = { impianto, _ -> 
                         onSaveImpianto(impianto)
@@ -62,79 +68,109 @@ fun CantiereDetailScreen(
         NuovoImpiantoDialog(
             impiantiGlobali = state.impiantiGlobali,
             onDismiss = { showNuovoImpiantoDialog = false },
-            onConfirm = { template, quantita ->
-                onCreateNewImpianto(template, quantita)
+            onConfirm = { template ->
+                onCreateNewImpianto(template)
                 showNuovoImpiantoDialog = false
+            },
+            onMassiveQuadroRequested = { template ->
+                selectedQuadroTemplate = template
+                showNuovoImpiantoDialog = false
+                showMassiveQuadroDialog = true
             }
         )
     }
-
+    
     if (showDeleteImpiantoDialog && impiantoInEliminazione != null) {
         AlertDialog(
-            onDismissRequest = { showDeleteImpiantoDialog = false },
-            title = { Text("Elimina Impianto") },
-            text = {
-                Text(
-                    "Sei sicuro di voler eliminare l'impianto '${impiantoInEliminazione!!.nomeCompleto}'?\n\n" +
-                    "Questa operazione lo eliminerà definitivamente dal database. L'azione non è reversibile."
-                )
+            onDismissRequest = { 
+                showDeleteImpiantoDialog = false
+                impiantoInEliminazione = null
             },
+            title = { Text("Conferma eliminazione") },
+            text = { Text("Vuoi davvero eliminare l'impianto '${impiantoInEliminazione?.nomeCompleto}' da questo cantiere?") },
             confirmButton = {
                 Button(
                     onClick = {
                         onDeleteImpianto(impiantoInEliminazione!!.id)
                         showDeleteImpiantoDialog = false
+                        impiantoInEliminazione = null
                     },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error, contentColor = MaterialTheme.colors.onError)
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error, contentColor = Color.White)
                 ) {
                     Text("Elimina")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteImpiantoDialog = false }) {
+                TextButton(onClick = { 
+                    showDeleteImpiantoDialog = false
+                    impiantoInEliminazione = null
+                }) {
                     Text("Annulla")
                 }
             }
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(32.dp)) {
-        // Top Bar
+    if (showMassiveQuadroDialog) {
+        MassiveQuadroCreationDialog(
+            cantiereId = state.selectedCantiere?.id ?: "",
+            templateQuadro = selectedQuadroTemplate,
+            interruttoriDisponibili = state.componentiStandard.filter { it.tipo == manutenzioni.domain.model.TipoComponenteStandard.INTERRUTTORE_BT }.map { manutenzioni.domain.model.InterruttoreBT(nome = it.nome) },
+            onDismiss = { showMassiveQuadroDialog = false },
+            onSave = { nuoviQuadri ->
+                nuoviQuadri.forEach { onSaveImpianto(it) }
+                showMassiveQuadroDialog = false
+            }
+        )
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp)
+    ) {
+        // Header
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Indietro")
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = "Cantiere: ${state.selectedCantiere?.nome}",
-                    style = MaterialTheme.typography.h5,
-                    color = MaterialTheme.colors.onBackground
-                )
-                Text(
-                    text = "Seleziona gli impianti per la manutenzione",
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.secondary
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                onClick = { showNuovoImpiantoDialog = true },
-                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary, contentColor = Color.White)
-            ) {
-                Text("+ Aggiungi Impianto")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Torna indietro")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = state.selectedCantiere?.nome ?: "Dettaglio Cantiere",
+                        style = MaterialTheme.typography.h5,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Gestione moduli e generazione schede",
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.secondary
+                    )
+                }
             }
         }
 
-        Divider(color = SlateBorder, thickness = 1.dp)
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-            // Colonna 1: Lista Impianti
-            Box(modifier = Modifier.weight(2f).fillMaxHeight()) {
+        Row(modifier = Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+            // Colonna 1: Impianti del cantiere
+            Column(modifier = Modifier.weight(2f).fillMaxHeight()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Impianti in questo cantiere", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.SemiBold)
+                    Button(onClick = { showNuovoImpiantoDialog = true }) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Aggiungi Impianto")
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
                 ImpiantoSelectionList(
                     impianti = state.impiantiDelCantiere,
                     selectionState = state.impiantiSelezionati,
@@ -147,15 +183,13 @@ fun CantiereDetailScreen(
                         impiantoInEliminazione = impianto
                         showDeleteImpiantoDialog = true
                     },
-                    onQuantitaChanged = { impianto, nuovaQ ->
-                        onSaveImpianto(impianto.copy(quantita = nuovaQ))
-                    }
+                    modifier = Modifier.weight(1f).fillMaxWidth()
                 )
             }
 
             // Colonna 2: Frequenza e Generazione
             Column(
-                modifier = Modifier.weight(1f).fillMaxHeight(),
+                modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 Card(
@@ -166,26 +200,40 @@ fun CantiereDetailScreen(
                     backgroundColor = MaterialTheme.colors.surface
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
-                        Text("1. Scegli Frequenza", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.SemiBold)
+                        Text("1. Scegli Frequenza per Modulo", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.SemiBold)
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        state.frequenzeDisponibili.forEach { periodo ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = state.selectedFrequenza == periodo,
-                                    onClick = { onFrequenzaSelected(periodo) },
-                                    colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colors.primary)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = periodo.label(), style = MaterialTheme.typography.body2)
-                            }
-                        }
+                        val impiantiAttiviIds = state.impiantiSelezionati.filter { it.value }.keys
+                        val impiantiAttivi = state.impiantiDelCantiere.filter { it.id in impiantiAttiviIds }
                         
-                        if (state.frequenzeDisponibili.isEmpty()) {
-                            Text("Nessuna frequenza disponibile. Seleziona almeno un impianto.", color = MaterialTheme.colors.error, style = MaterialTheme.typography.body2)
+                        if (impiantiAttivi.isEmpty()) {
+                            Text("Seleziona almeno un impianto dalla lista a sinistra.", color = MaterialTheme.colors.error, style = MaterialTheme.typography.body2)
+                        } else {
+                            impiantiAttivi.forEach { impianto ->
+                                val frequenzeDisp = manutenzioni.domain.service.AntincendioAttivitaResolver.resolveFrequenze(impianto, state.impiantiDelCantiere)
+                                val currentFreq = state.frequenzePerImpianto[impianto.id]
+                                val displayLabel = if (impianto is manutenzioni.domain.model.QuadroBT) "${impianto.codIntervento} - ${impianto.sigla}" else impianto.codIntervento
+                                Text(text = displayLabel, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.body2, modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
+                                
+                                if (frequenzeDisp.isEmpty()) {
+                                    Text("Nessuna attività registrata per questo modulo.", style = MaterialTheme.typography.caption, color = MaterialTheme.colors.error)
+                                } else {
+                                    frequenzeDisp.forEach { periodo ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            RadioButton(
+                                                selected = currentFreq == periodo,
+                                                onClick = { onFrequenzaPerImpiantoSelected(impianto.id, periodo) },
+                                                colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colors.primary)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(text = periodo.label(), style = MaterialTheme.typography.body2)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -201,7 +249,8 @@ fun CantiereDetailScreen(
                         Text("2. Generazione PDF", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.SemiBold)
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        val isEnabled = state.selectedFrequenza != null && state.impiantiSelezionati.any { it.value }
+                        val impiantiAttiviIdsForGen = state.impiantiSelezionati.filter { it.value }.keys
+                        val isEnabled = impiantiAttiviIdsForGen.isNotEmpty() && impiantiAttiviIdsForGen.all { id -> state.frequenzePerImpianto.containsKey(id) }
                         Button(
                             onClick = onGeneraPdf,
                             enabled = isEnabled && !state.isLoading,
